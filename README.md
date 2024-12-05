@@ -1,0 +1,1 @@
+A sentence analyzer application for language-learning that will break up an input sentence into its constituent parts.
