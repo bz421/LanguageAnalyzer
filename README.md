@@ -6,6 +6,7 @@ A sentence analyzer application for language-learning that will break up an inpu
     - `npm i`
     - `cd client`
     - `npm i`
+    - `cd ..`
     - `cd server`
     - `npm i`
 2. Make sure you have installed all the required python packages
