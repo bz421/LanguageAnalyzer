@@ -1,5 +1,7 @@
 import requests
 from flask import Flask, request
+from deep_translator import GoogleTranslator
+translator = GoogleTranslator(source='auto', target='en')
 
 app = Flask(__name__)
 
@@ -24,7 +26,7 @@ def translate():
         'q': data['q']
     }
     r = requests.get(r'https://translate.googleapis.com/translate_a/single?', params=params)
-    result = r.json()[0][0][0]
+    result = translator.translate(data['q'])
     language = r.json()[2]
     return {'result': result, 'language': language}, 200
 
