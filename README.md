@@ -13,6 +13,7 @@ A sentence analyzer application for language-learning that will break up an inpu
     - Flask
     - spaCy
     - requests
+    - deep_translator
 3. Run the components (in the following order)
     - Python backend: just run the file using `python <filename>`
     - Node.js server: `cd server` then `npm run dev`
