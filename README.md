@@ -12,6 +12,7 @@ A sentence analyzer application for language-learning that will break up an inpu
 2. Make sure you have installed all the required python packages
     - Flask
     - spaCy
+    - requests
 3. Run the components (in the following order)
     - Python backend: just run the file using `python <filename>`
     - Node.js server: `cd server` then `npm run dev`
