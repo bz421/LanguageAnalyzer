@@ -1,6 +1,7 @@
 import requests
 from flask import Flask, request
 from deep_translator import GoogleTranslator
+translator = GoogleTranslator(source='auto', target='en')
 
 app = Flask(__name__)
 
@@ -14,7 +15,6 @@ def echo():
 
 @app.route('/api/translate', methods=['POST'])
 def translate():
-    translator = GoogleTranslator(source='auto', target='en')
     data = request.get_json()
     if not data or 'q' not in data:
         return {'error': 'No q provided'}, 400
