@@ -1,4 +1,6 @@
 import React, {useState, useEffect} from 'react'
+import { useNavigate } from 'react-router-dom';
+import './styles.css'
 
 export default function Home() {
     const [msg, setMsg] = useState('')
@@ -8,6 +10,7 @@ export default function Home() {
     const [subjs, setSubjs] = useState([])
     const [verbs, setVerbs] = useState([])
     const [adjs, setAdjs] = useState('')
+    const navigate = useNavigate()
 
     const handleSubmit = async(e) => {
         e.preventDefault()
@@ -127,6 +130,14 @@ export default function Home() {
             <p>Detected Subjects: <b>{subjs}</b></p>
             <p>Detected Verb Phrases: <b>{verbs}</b></p>
             <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
+
+            <div class="menu">
+                <button onClick={() => navigate('/spanish/')}>Spanish</button>
+                <button onClick={() => navigate('/french/')}>French</button>
+                <button onClick={() => navigate('/mandarin/')}>Mandarin</button>
+
+
+            </div>
         </div>
     )
 }
