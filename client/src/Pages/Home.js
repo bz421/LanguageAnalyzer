@@ -8,7 +8,7 @@ export default function Home() {
 
     const handleSubmit = async(e) => {
         e.preventDefault()
-        await getTranslation()
+        await testspacy()
     }
 
     const getTranslation = async () => {
@@ -25,6 +25,20 @@ export default function Home() {
         console.log(data.result)
         setTranslation(data.result)
         setLang(data.language)
+    }
+
+    const testspacy = async () => {
+        const response = await fetch('api/testspacy', {
+            method: 'POST',
+            
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        console.log(data.tokens)
+        setTranslation(data.tokens.tokenPos)
+        // setLang(data.language)
     }
 
     const getMessage = async () => {
@@ -56,8 +70,10 @@ export default function Home() {
                 />
                 <button type="submit">Send</button>
             </form>
-            <p>English Translation: {translation}</p>
-            <p>Detected Language: {lang}</p>
+            {/* <p>English Translation: {translation}</p>
+            <p>Detected Language: {lang}</p> */}
+
+            {/* {console.log(tokens['tokenText'])}/ */}
         </div>
     )
 }
