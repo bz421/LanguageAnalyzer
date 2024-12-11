@@ -11,10 +11,14 @@ export default function Home() {
 
     const handleSubmit = async(e) => {
         e.preventDefault()
+<<<<<<< HEAD
         getTranslation()
         getSubject()
         getVerbs()
         getAdjs()
+=======
+        await testspacy()
+>>>>>>> ac0fdf1 (Stashing)
     }
 
     const getTranslation = async () => {
@@ -33,17 +37,25 @@ export default function Home() {
         setLang(data.language)
     }
 
+<<<<<<< HEAD
     const getSubject = async () => {
         const response = await fetch('api/getSubj', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
+=======
+    const testspacy = async () => {
+        const response = await fetch('api/testspacy', {
+            method: 'POST',
+            
+>>>>>>> ac0fdf1 (Stashing)
             body: JSON.stringify({
                 'q': input
             })
         })
         const data = await response.json()
+<<<<<<< HEAD
         console.log('Subjects: ' + data.subjects)
         let out = ''
         for (let i=0; i<data.subjects.length-1; i++) {
@@ -91,6 +103,11 @@ export default function Home() {
         }
         out += data.adjectives[data.adjectives.length-1]
         setAdjs(out)
+=======
+        console.log(data.tokens)
+        setTranslation(data.tokens.tokenPos)
+        // setLang(data.language)
+>>>>>>> ac0fdf1 (Stashing)
     }
 
     const getMessage = async () => {
@@ -122,11 +139,18 @@ export default function Home() {
                 />
                 <button type="submit">Send</button>
             </form>
+<<<<<<< HEAD
             <p>English Translation: {translation}</p>
             <p>Detected Language: {lang}</p>
             <p>Detected Subjects: <b>{subjs}</b></p>
             <p>Detected Verb Phrases: <b>{verbs}</b></p>
             <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
+=======
+            {/* <p>English Translation: {translation}</p>
+            <p>Detected Language: {lang}</p> */}
+
+            {/* {console.log(tokens['tokenText'])}/ */}
+>>>>>>> ac0fdf1 (Stashing)
         </div>
     )
 }
