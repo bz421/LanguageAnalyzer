@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import './styles.css'
 
-export default function Home() {
+export default function Spanish() {
     const [msg, setMsg] = useState('')
     const [translation, setTranslation] = useState('')
     const [lang, setLang] = useState('')
@@ -111,11 +111,10 @@ export default function Home() {
     useEffect(() => {
         getMessage()
     }, [])
-    return (
-        <div style={{'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'center', 'alignItems': 'center'}}>
-            <h1>Backend says</h1>
-            <p>{msg}</p>
 
+    return (
+        <div class="page">
+            <div class="navbar"></div>
             <form onSubmit={handleSubmit}>
                 <input
                     type="text"
@@ -131,13 +130,7 @@ export default function Home() {
             <p>Detected Verb Phrases: <b>{verbs}</b></p>
             <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
 
-            <div class="menu">
-                <button onClick={() => navigate('/spanish/')}>Spanish</button>
-                <button onClick={() => navigate('/french/')}>French</button>
-                <button onClick={() => navigate('/mandarin/')}>Mandarin</button>
-
-
-            </div>
+            <p>hola este es Español</p>
         </div>
     )
 }

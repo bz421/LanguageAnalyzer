@@ -1,0 +1,30 @@
+.navbar{
+    position: absolute;
+    top: 0;
+    width: 100%
+}
+
+.page {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu {
+    display:flex;
+    flex-direction: column;
+}
+
+.menu>button {
+    border: 0;
+    padding: 7px 20px;
+    margin: 10px;
+    font-size: 1.5rem;
+    border-radius: 10px;
+    background-color: rgb(239, 185, 79);
+}
+
+.menu>button:hover {
+    background-color: rgb(192, 150, 65);
+}
