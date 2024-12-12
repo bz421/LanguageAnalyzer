@@ -32,7 +32,7 @@ def translate():
 
 import spacy
 model = spacy.load("en_core_web_sm")
-@translation.route('/api/testspacy', methods=['POST'])
+@app.route('/api/testspacy', methods=['POST'])
 def testspacy():
     
     
@@ -68,7 +68,7 @@ def testspacy():
     # language = r.json()[2]
     return {'tokens': tokens}, 200
 
-@translation.route('/api/hello')
+@app.route('/api/hello')
 def hello_world():
     return {'message': 'Hello from Python backend!'}
 

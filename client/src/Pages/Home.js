@@ -11,14 +11,7 @@ export default function Home() {
 
     const handleSubmit = async(e) => {
         e.preventDefault()
-<<<<<<< HEAD
-        getTranslation()
-        getSubject()
-        getVerbs()
-        getAdjs()
-=======
         await testspacy()
->>>>>>> ac0fdf1 (Stashing)
     }
 
     const getTranslation = async () => {
@@ -35,6 +28,20 @@ export default function Home() {
         console.log(data.result)
         setTranslation(data.result)
         setLang(data.language)
+    }
+
+    const testspacy = async () => {
+        const response = await fetch('api/testspacy', {
+            method: 'POST',
+            
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        console.log(data.tokens)
+        setTranslation(data.tokens.tokenPos)
+        // setLang(data.language)
     }
 
 <<<<<<< HEAD
@@ -140,8 +147,10 @@ export default function Home() {
                 <button type="submit">Send</button>
             </form>
 <<<<<<< HEAD
-            <p>English Translation: {translation}</p>
-            <p>Detected Language: {lang}</p>
+            {/* <p>English Translation: {translation}</p>
+            <p>Detected Language: {lang}</p> */}
+
+            {/* {console.log(tokens['tokenText'])}/ */}
             <p>Detected Subjects: <b>{subjs}</b></p>
             <p>Detected Verb Phrases: <b>{verbs}</b></p>
             <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
