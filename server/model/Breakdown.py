@@ -57,13 +57,7 @@ def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[str]
         [
             {'DEP': 'det', 'OP': '?'},  # Determiner
             {'DEP': 'amod', 'OP': '*'}, # adjectival modifiers
-            {'POS': 'NOUN', 'DEP': 'nsubj'},  # Subject
-            {'POS': 'ADJ', 'OP': '*'}  # Optional adjectives
-        ],
-        [
-            {'DEP': 'det', 'OP': '?'},  # Determiner
-            {'DEP': 'amod', 'OP': '*'},  # adjectival modifiers
-            {'POS': 'PRON', 'DEP': 'nsubj'},  # Subject(pronoun)
+            {'POS': {'IS_SUBSET' : ['NOUN', 'ADJ', 'DET', 'PRON']}, 'DEP': 'nsubj'},  # Subject
             {'POS': 'ADJ', 'OP': '*'}  # Optional adjectives
         ],
         [
