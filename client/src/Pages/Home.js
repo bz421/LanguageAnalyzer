@@ -7,9 +7,12 @@ export default function Home() {
     const [translation, setTranslation] = useState('')
     const [lang, setLang] = useState('')
     const [input, setInput] = useState('')
+
     const [subjs, setSubjs] = useState([])
     const [verbs, setVerbs] = useState([])
     const [adjs, setAdjs] = useState('')
+    const [objs, setObjs] = useState('')
+
     const navigate = useNavigate()
 
     const handleSubmit = async(e) => {
@@ -18,6 +21,7 @@ export default function Home() {
         getSubject()
         getVerbs()
         getAdjs()
+        getObjs()
     }
 
     const getTranslation = async () => {
@@ -67,12 +71,13 @@ export default function Home() {
             })
         })
         const data = await response.json()
-        console.log('Verbs: ' + data.verbs)
+        console.log('Verbs: ' + JSON.stringify(data.verbs))
         let out = ''
-        for (let i=0; i<data.verbs.length-1; i++) {
-            out += data.verbs[i] + ', '
+        for (let i=0; i<data.verbs.length; i++) {
+            const key = data.verbs[i]['key']
+            const value = data.verbs[i]['value']
+            out += key + ': ' + value + "    "
         }
-        out += data.verbs[data.verbs.length-1]
         setVerbs(out)
     }
 
@@ -94,6 +99,28 @@ export default function Home() {
         }
         out += data.adjectives[data.adjectives.length-1]
         setAdjs(out)
+    }
+
+    const getObjs = async () => {
+        const response = await fetch('/api/getObj', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        console.log('Objs: ' + JSON.stringify(data.objects))
+        let out = ''
+        for (let i=0; i<data.objects.length; i++) {
+            const key = data.objects[i]['key']
+            const value = data.objects[i]['value']
+            out += key + ': ' + value + "    "
+        }
+        // out += data.objects[data.objects.length-1]
+        setObjs(out)
     }
 
     const getMessage = async () => {
@@ -130,13 +157,13 @@ export default function Home() {
             <p>Detected Subjects: <b>{subjs}</b></p>
             <p>Detected Verb Phrases: <b>{verbs}</b></p>
             <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
+            <p>Detected Object Phrases: <b>{objs}</b></p>
+            <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p>
 
             <div class="menu">
                 <button onClick={() => navigate('/spanish/')}>Spanish</button>
                 <button onClick={() => navigate('/french/')}>French</button>
                 <button onClick={() => navigate('/mandarin/')}>Mandarin</button>
-
-
             </div>
         </div>
     )

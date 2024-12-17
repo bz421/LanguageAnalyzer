@@ -1,4 +1,4 @@
 from flask import Blueprint
 
-from .Breakdown import breakdown
+from .SpanishBreakdown import SpanishBreakdown
 from .Translation import translation
