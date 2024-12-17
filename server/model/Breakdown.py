@@ -48,6 +48,7 @@ def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[str]
     filtered = filter_spans(spans)
     filtered = [str(f) for f in filtered]
 
+    print(filtered)
     return {'subjects': filtered}, 200
 
 
