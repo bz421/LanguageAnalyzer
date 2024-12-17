@@ -25,11 +25,20 @@ export default function Home() {
             <h1>Backend says</h1>
             <p>{msg}</p>
 
-            <div class="menu">
-                <button onClick={() => navigate('/spanish/')}>Spanish</button>
-                <button onClick={() => navigate('/french/')}>French</button>
-                <button onClick={() => navigate('/mandarin/')}>Mandarin</button>
-            </div>
+            <form onSubmit={handleSubmit}>
+                <input
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Enter a message"
+                />
+                <button type="submit">Send</button>
+            </form>
+            <p>English Translation: {translation}</p>
+            <p>Detected Language: {lang}</p>
+            <p>Detected Subjects: <b>{subjs}</b></p>
+            <p>Detected Verb Phrases: <b>{verbs}</b></p>
+            <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
         </div>
     )
 }
