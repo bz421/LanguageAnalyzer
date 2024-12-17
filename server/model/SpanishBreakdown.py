@@ -131,11 +131,11 @@ def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[s
     adjectivePattern = [
         [
             {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'}, # optional adverb(modifier for adjective)
-            {'POS': 'ADJ', 'DEP': 'amod', 'OP': '+'}, # adjective
+            {'POS': 'ADJ', 'DEP': {'IN': ['amod', 'advmod']}, 'OP': '+'}, # adjective
         ],
         [
             {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
-            {'POS': 'ADV', 'DEP': 'advmod', 'OP': '+'},  # adverb
+            {'POS': 'ADV', 'DEP': {'IN': ['amod', 'advmod']}, 'OP': '+'},  # adverb
         ],
         [
             {'POS': 'DET', 'DEP': 'det', 'OP': '*'},
@@ -190,7 +190,9 @@ def getObjects():
             {'POS': 'NOUN', 'DEP': {'IN': ['obj', 'nsubj']}, 'OP': '*'},
             {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
             {'POS': 'ADJ', 'DEP': 'amod', 'OP': '*'},  # adjective
-            {'POS': 'PRON', 'DEP': {'IN': ['obj', 'iobj']}} # final pronoun
+            {'POS': 'PRON', 'DEP': {'IN': ['obj', 'iobj']}, 'OP': '*'}, # final pronoun
+            {'POS': 'ADP', 'DEP': 'case', 'OP': '?'}, # optional adposition
+            {'POS': 'NOUN', 'DEP': 'nmod', 'OP': '?'} # optional noun modifier
         ]
     ]
     matcher.add('Object', objectPattern)
