@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './styles.css'
 
-export default function Home() {
+export default function Language() {
+    const { lang } = useParams()
     const [msg, setMsg] = useState('')
     const [translation, setTranslation] = useState('')
-    const [lang, setLang] = useState('')
+    // const [lang, setLang] = useState('')
     const [input, setInput] = useState('')
     const [subjs, setSubjs] = useState([])
     const [verbs, setVerbs] = useState([])
@@ -33,7 +34,6 @@ export default function Home() {
         const data = await response.json()
         console.log(data.result)
         setTranslation(data.result)
-        setLang(data.language)
     }
 
     const getSubject = async () => {
@@ -107,29 +107,30 @@ export default function Home() {
         )
     }
 
-
     useEffect(() => {
         getMessage()
     }, [])
-    return (
-        <div style={{'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'center', 'alignItems': 'center'}}>
-            <h1>Backend says</h1>
-            <p>{msg}</p>
 
-            <form onSubmit={handleSubmit}>
-                <input
+    return (
+        <div class="page">
+            <div class="instruction">
+                Enter a {lang} text to analyze!
+            </div>
+            <form  onSubmit={handleSubmit}>
+                <input class="text-box"
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Enter a message"
                 />
-                <button type="submit">Send</button>
+                <button type="submit">Analyze</button>
             </form>
             <p>English Translation: {translation}</p>
-            <p>Detected Language: {lang}</p>
             <p>Detected Subjects: <b>{subjs}</b></p>
             <p>Detected Verb Phrases: <b>{verbs}</b></p>
             <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
         </div>
+
+        
     )
 }

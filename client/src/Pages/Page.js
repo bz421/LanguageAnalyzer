@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import './styles.css'
 
-export default function Spanish() {
+export default function Page() {
     const [msg, setMsg] = useState('')
     const [translation, setTranslation] = useState('')
     const [lang, setLang] = useState('')
@@ -114,15 +114,17 @@ export default function Spanish() {
 
     return (
         <div class="page">
-            <div class="navbar"></div>
-            <form onSubmit={handleSubmit}>
-                <input
+            <div class="instruction">
+                Enter a Spanish text to analyze!
+            </div>
+            <form  onSubmit={handleSubmit}>
+                <input class="text-box"
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Enter a message"
                 />
-                <button type="submit">Send</button>
+                <button type="submit">Analyze</button>
             </form>
             <p>English Translation: {translation}</p>
             <p>Detected Language: {lang}</p>
