@@ -1,9 +1,11 @@
 import { Navigate, useNavigate } from "react-router-dom"
 
-export default function Navbar() {
+export default function Navbar(props) {
     const navigate = useNavigate();
-    
+
     return (
-        <div></div>
+        <div class="navbar" style={props.style}>
+            <p>Language Analyzer</p>
+        </div>
     )
 }

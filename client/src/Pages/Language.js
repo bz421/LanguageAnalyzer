@@ -1,11 +1,10 @@
 import React, {useState, useEffect} from 'react'
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useParams} from 'react-router-dom';
 import './styles.css'
 
-export default function Spanish() {
+export default function Page() {
     const [msg, setMsg] = useState('')
     const [translation, setTranslation] = useState('')
-    const [lang, setLang] = useState('')
     const [input, setInput] = useState('')
 
     const [subjs, setSubjs] = useState([])
@@ -13,9 +12,11 @@ export default function Spanish() {
     const [adjs, setAdjs] = useState('')
     const [objs, setObjs] = useState('')
 
+    const {lang} = useParams()
+
     const navigate = useNavigate()
 
-    const handleSubmit = async(e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         getTranslation()
         getSubject()
@@ -37,7 +38,6 @@ export default function Spanish() {
         const data = await response.json()
         console.log(data.result)
         setTranslation(data.result)
-        setLang(data.language)
     }
 
     const getSubject = async () => {
@@ -53,10 +53,10 @@ export default function Spanish() {
         const data = await response.json()
         console.log('Subjects: ' + data.subjects)
         let out = ''
-        for (let i=0; i<data.subjects.length-1; i++) {
+        for (let i = 0; i < data.subjects.length - 1; i++) {
             out += data.subjects[i] + ', '
         }
-        out += data.subjects[data.subjects.length-1]
+        out += data.subjects[data.subjects.length - 1]
         setSubjs(out)
     }
 
@@ -73,7 +73,7 @@ export default function Spanish() {
         const data = await response.json()
         console.log('Verbs: ' + JSON.stringify(data.verbs))
         let out = ''
-        for (let i=0; i<data.verbs.length; i++) {
+        for (let i = 0; i < data.verbs.length; i++) {
             const key = data.verbs[i]['key']
             const value = data.verbs[i]['value']
             out += key + ': ' + value + "    "
@@ -94,10 +94,10 @@ export default function Spanish() {
         const data = await response.json()
         console.log('Adjs: ' + data.adjectives)
         let out = ''
-        for (let i=0; i<data.adjectives.length-1; i++) {
+        for (let i = 0; i < data.adjectives.length - 1; i++) {
             out += data.adjectives[i] + ', '
         }
-        out += data.adjectives[data.adjectives.length-1]
+        out += data.adjectives[data.adjectives.length - 1]
         setAdjs(out)
     }
 
@@ -114,7 +114,7 @@ export default function Spanish() {
         const data = await response.json()
         console.log('Objs: ' + JSON.stringify(data.objects))
         let out = ''
-        for (let i=0; i<data.objects.length; i++) {
+        for (let i = 0; i < data.objects.length; i++) {
             const key = data.objects[i]['key']
             const value = data.objects[i]['value']
             out += key + ': ' + value + "    "
@@ -138,30 +138,34 @@ export default function Spanish() {
     useEffect(() => {
         getMessage()
     }, [])
+
     return (
-        <div style={{'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'center', 'alignItems': 'center'}}>
-            <h1>Backend says</h1>
+        <div>
             <p>{msg}</p>
+            <div class="page">
+                <div class="instruction">
+                    Enter a {lang} text to analyze!
+                </div>
+                <form onSubmit={handleSubmit}>
+                    <input class="text-box"
+                           type="text"
+                           value={input}
+                           onChange={(e) => setInput(e.target.value)}
+                           placeholder="Enter a message"
+                    />
+                    <button type="submit">Analyze</button>
+                </form>
+                <p>English Translation: {translation}</p>
+                <p>Detected Language: {lang}</p>
+                <p>Detected Subjects: <b>{subjs}</b></p>
+                <p>Detected Verb Phrases: <b>{verbs}</b></p>
+                <p>Detected Adjectival/Adverbial Phrases: <b>{adjs}</b></p>
+                <p>Detected Object Phrases: <b>{objs}</b></p>
+                <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p>
 
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Enter a message"
-                />
-                <button type="submit">Send</button>
-            </form>
-            <p>English Translation: {translation}</p>
-            <p>Detected Language: {lang}</p>
-            <p>Detected Subjects: <b>{subjs}</b></p>
-            <p>Detected Verb Phrases: <b>{verbs}</b></p>
-            <p>Detected Adjectival/Adverbial Phrases: <b>{adjs}</b></p>
-            <p>Detected Object Phrases: <b>{objs}</b></p>
-            <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p>
-
-            <div class="menu">
-                <button onClick={() => navigate('/')}>Home</button>
+                <div class="menu">
+                    <button onClick={() => navigate('/')}>Home</button>
+                </div>
             </div>
         </div>
     )
