@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "node Router.js",
-    "dev": "nodemon Router.js"
+    "dev": "nodemon Router.js --ignore client"
   },
   "keywords": [],
   "author": "",
