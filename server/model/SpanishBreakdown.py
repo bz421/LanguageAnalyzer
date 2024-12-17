@@ -23,6 +23,7 @@ spanishPronoun = {
 def remap_keys(mapping):
     return [{'key': k, 'value': v} for k, v in mapping.items()]
 
+# TODO: deal with weird stuff with ser
 def getImplicitSubjects(d):
     implicitPattern = [
         {'POS': 'VERB', 'DEP': 'ROOT', 'MORPH': {'IS_SUPERSET': ['VerbForm=Fin']}} # Conjugated verb with dropped pronoun
@@ -139,8 +140,13 @@ def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[s
         ],
         [
             {'POS': 'DET', 'DEP': 'det', 'OP': '*'},
-            {'POS': 'NOUN', 'DEP': 'obl'}
-        ]
+            {'POS': 'NOUN', 'DEP': 'obl'},
+        ],
+        [
+            {'POS': 'ADP', 'DEP': 'case', 'OP': '?'},  # optional adposition
+            {'POS': 'DET', 'DEP': 'det', 'OP': '?'},  # optional determiner
+            {'POS': 'NOUN', 'DEP': 'nmod', 'OP': '?'}  # optional noun modifier
+        ],
     ]
 
     cconjPatterns = [
