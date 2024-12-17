@@ -156,7 +156,7 @@ export default function Spanish() {
             <p>Detected Language: {lang}</p>
             <p>Detected Subjects: <b>{subjs}</b></p>
             <p>Detected Verb Phrases: <b>{verbs}</b></p>
-            <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
+            <p>Detected Adjectival/Adverbial Phrases: <b>{adjs}</b></p>
             <p>Detected Object Phrases: <b>{objs}</b></p>
             <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p>
 
