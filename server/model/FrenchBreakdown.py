@@ -8,39 +8,31 @@ from spacy.util import filter_spans
 from flask import Flask, request
 from flask import Blueprint
 
-SpanishBreakdown = Blueprint('SpanishBreakdown', __name__)
+FrenchBreakdown = Blueprint('FrenchBreakdown', __name__)
 
 from spacy.matcher import Matcher
+nlpES = spacy.load('fr_dep_news_trf')
 
-nlpES = spacy.load('es_dep_news_trf')
-
-spanishPronoun = {
-    ('1', 'Sing'): 'yo',
-    ('2', 'Sing'): 'tú',
-    ('3', 'Sing'): 'él/ella/usted',
-    ('1', 'Plur'): 'nosotros/nosotras',
-    ('3', 'Plur'): 'ellos/ellas/ustedes'
+frenchPronoun = {
+    ('1', 'Sing'): 'je',
+    ('2', 'Sing'): 'tu',
+    ('3', 'Sing'): 'il/elle/on',
+    ('1', 'Plur'): 'nous',
+    ('2', 'Plur'): 'vous',
+    ('3', 'Plur'): 'ils/elles'
 }
-
 
 def remap_keys(mapping):
     return [{'key': k, 'value': v} for k, v in mapping.items()]
 
-
 # TODO: deal with weird stuff with ser
 def getImplicitSubjects(d):
     implicitPattern = [
-        [
-            {'POS': 'VERB', 'DEP': 'ROOT', 'MORPH': {'IS_SUPERSET': ['VerbForm=Fin']}}
-            # Conjugated verb with dropped pronoun
-        ],
-        [
-            {'LEMMA': 'ser', 'MORPH': {'IS_SUPERSET': ['VerbForm=Fin']}}  # Ser edge case
-        ]
+        {'POS': 'VERB', 'DEP': 'ROOT', 'MORPH': {'IS_SUPERSET': ['VerbForm=Fin']}} # Conjugated verb with dropped pronoun
     ]
 
     matcher = Matcher(nlpES.vocab)
-    matcher.add('ImplicitSubject', implicitPattern)
+    matcher.add('ImplicitSubject', [implicitPattern])
     matches = matcher(d)
     spans = [d[start:end] for _, start, end in matches]
     filtered = filter_spans(spans)
@@ -56,13 +48,12 @@ def getImplicitSubjects(d):
     idx = 0
     for string in mapping:
         text = mapping[string].text
-        person = spanishPronoun[(mapping[string].morph.get('Person')[0]), (mapping[string].morph.get('Number')[0])]
+        person = frenchPronoun[(mapping[string].morph.get('Person')[0]), (mapping[string].morph.get('Number')[0])]
         out.append(('(' + person + ') ' + text, filtered[idx][1], filtered[idx][2]))
-        idx += 1
+        idx+=1
     return out
 
-
-@SpanishBreakdown.route('/api/es/getSubj', methods=['POST'])
+@FrenchBreakdown.route('/api/fr/getSubj', methods=['POST'])
 def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
     data = request.get_json()
     print('Subject:' + str(data))
@@ -74,15 +65,15 @@ def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[tupl
     subjectPattern = [
         [
             {'DEP': 'det', 'OP': '?'},  # Determiner
-            {'DEP': 'amod', 'OP': '*'},  # adjectival modifiers
-            {'POS': {'IS_SUBSET': ['NOUN', 'ADJ', 'DET', 'PRON']}, 'DEP': 'nsubj'},  # Subject
+            {'DEP': 'amod', 'OP': '*'}, # adjectival modifiers
+            {'POS': {'IS_SUBSET' : ['NOUN', 'ADJ', 'DET', 'PRON']}, 'DEP': 'nsubj'},  # Subject
             {'POS': 'ADJ', 'OP': '*'}  # Optional adjectives
         ],
         [
             {'DEP': 'det', 'OP': '?'},  # Determiner
             {'DEP': 'amod', 'OP': '*'},  # adjectival modifiers
             {'POS': 'PROPN', 'DEP': 'nsubj'},  # Subject(proper noun)
-            {'POS': 'PROPN', 'DEP': 'flat', 'OP': '*'},  # The rest of the proper noun(e.g. full names)
+            {'POS': 'PROPN', 'DEP': 'flat', 'OP': '*'}, # The rest of the proper noun(e.g. full names)
             {'POS': 'ADJ', 'OP': '*'}  # Optional adjectives
         ]
     ]
@@ -96,7 +87,7 @@ def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[tupl
     return {'subjects': filtered}, 200
 
 
-@SpanishBreakdown.route('/api/es/getVerb', methods=['POST'])
+@FrenchBreakdown.route('/api/fr/getVerb', methods=['POST'])
 def getVerbPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
     data = request.get_json()
     if not data or 'q' not in data:
@@ -104,8 +95,7 @@ def getVerbPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[
     d = nlpES(data['q'])
 
     verbPattern = [
-        {'POS': 'PRON', 'DEP': 'expl:pv', 'OP': '?'},
-        # Reflexive pronoun in front of main verb (sometimes doesn't work)
+        {'POS': 'PRON', 'DEP': 'expl:pv', 'OP': '?'}, # Reflexive pronoun in front of main verb (sometimes doesn't work)
         {'POS': 'VERB', 'OP': '?'},  # Auxiliary, helping verbs
         {'POS': 'ADV', 'OP': '*'},  # Auxiliary adjectives
         {'POS': 'AUX', 'OP': '*'},  # Other auxiliary verbs
@@ -134,8 +124,7 @@ def getVerbPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[
 
     return {'verbs': remap_keys(out)}, 200
 
-
-@SpanishBreakdown.route('/api/es/getAdj', methods=['POST'])
+@FrenchBreakdown.route('/api/fr/getAdj', methods=['POST'])
 def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
     data = request.get_json()
     if not data or 'q' not in data:
@@ -144,8 +133,8 @@ def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[s
 
     adjectivePattern = [
         [
-            {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
-            {'POS': 'ADJ', 'DEP': {'IN': ['amod', 'advmod']}, 'OP': '+'},  # adjective
+            {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'}, # optional adverb(modifier for adjective)
+            {'POS': 'ADJ', 'DEP': {'IN': ['amod', 'advmod']}, 'OP': '+'}, # adjective
         ],
         [
             {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
@@ -173,12 +162,12 @@ def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[s
 
     cconjPatterns = [
         [
-            {'POS': 'CCONJ', 'DEP': 'cc'},  # CCONJ
+            {'POS': 'CCONJ', 'DEP': 'cc'}, # CCONJ
             {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
             {'POS': 'ADJ', 'OP': '+'},  # adjective
         ],
         [
-            {'POS': 'CCONJ', 'DEP': 'cc'},  # CCONJ
+            {'POS': 'CCONJ', 'DEP': 'cc'}, # CCONJ
             {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
             {'POS': 'ADJ', 'DEP': 'advmod', 'OP': '+'},  # adverb
         ]
@@ -202,14 +191,14 @@ def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[s
     print(filtered)
     return {'adjectives': filtered}, 200
 
-
-@SpanishBreakdown.route('/api/es/getObj', methods=['POST'])
+@FrenchBreakdown.route('/api/fr/getObj', methods=['POST'])
 def getObjects():
     data = request.get_json()
     print('Object: ' + str(data))
     if not data or 'q' not in data:
         return {'error': 'No query provided'}, 400
     d = nlpES(data['q'])
+
 
     matcher = Matcher(nlpES.vocab)
     objectPattern = [
@@ -248,5 +237,5 @@ def getObjects():
     return {'objects': remap_keys(out)}, 200
 
 
-print('Ready Spanish')
-# Mi mamá alta quiere bailar con sus mejores amigas.
+print('Ready French')
+# J'irai à l'université dans 3 ans.
