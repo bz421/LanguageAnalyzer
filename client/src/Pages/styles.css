@@ -31,11 +31,11 @@
     align-items: center;
     border: 0;  
     background-color: white;
-    margin: 0.4rem;
     margin: auto;
     color: #959ba3;
     font-size: 1rem;
     padding: 20px;
+    cursor: pointer;
 }
 
 .sidebar>button:hover {
@@ -65,6 +65,7 @@
     margin-right: 10px;
     padding: 10px 20px;
     font-size: 16px;
+    cursor: pointer;
 }
 
 .menu>button:hover {
