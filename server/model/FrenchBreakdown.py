@@ -25,14 +25,19 @@ frenchPronoun = {
 def remap_keys(mapping):
     return [{'key': k, 'value': v} for k, v in mapping.items()]
 
-# TODO: deal with weird stuff with ser
+# TODO: deal with weird stuff with être
 def getImplicitSubjects(d):
     implicitPattern = [
-        {'POS': 'VERB', 'DEP': 'ROOT', 'MORPH': {'IS_SUPERSET': ['VerbForm=Fin']}} # Conjugated verb with dropped pronoun
+        [
+            {'POS': 'VERB', 'DEP': 'ROOT', 'MORPH': {'IS_SUPERSET': ['VerbForm=Fin']}} # Conjugated verb with dropped pronoun
+        ],
+        [
+            {'LEMMA': 'être', 'MORPH': {'IS_SUPERSET': ['VerbForm=Fin']}}  # Ser edge case
+        ]
     ]
 
     matcher = Matcher(nlpES.vocab)
-    matcher.add('ImplicitSubject', [implicitPattern])
+    matcher.add('ImplicitSubject', implicitPattern)
     matches = matcher(d)
     spans = [d[start:end] for _, start, end in matches]
     filtered = filter_spans(spans)
