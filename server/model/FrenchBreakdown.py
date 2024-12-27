@@ -11,7 +11,11 @@ from flask import Blueprint
 FrenchBreakdown = Blueprint('FrenchBreakdown', __name__)
 
 from spacy.matcher import Matcher
-nlpES = spacy.load('fr_dep_news_trf')
+nlpFR = spacy.load('fr_dep_news_trf')
+
+"""
+Check language.js for info on the return types of the functions below
+"""
 
 frenchPronoun = {
     ('1', 'Sing'): 'je',
@@ -36,7 +40,7 @@ def getImplicitSubjects(d):
         ]
     ]
 
-    matcher = Matcher(nlpES.vocab)
+    matcher = Matcher(nlpFR.vocab)
     matcher.add('ImplicitSubject', implicitPattern)
     matches = matcher(d)
     spans = [d[start:end] for _, start, end in matches]
@@ -59,14 +63,14 @@ def getImplicitSubjects(d):
     return out
 
 @FrenchBreakdown.route('/api/fr/getSubj', methods=['POST'])
-def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
+def getSubjectPhrase():
     data = request.get_json()
     print('Subject:' + str(data))
     if not data or 'q' not in data:
         return {'error': 'No query provided'}, 400
-    d = nlpES(data['q'])
+    d = nlpFR(data['q'])
 
-    matcher = Matcher(nlpES.vocab)
+    matcher = Matcher(nlpFR.vocab)
     subjectPattern = [
         [
             {'DEP': 'det', 'OP': '?'},  # Determiner
@@ -93,11 +97,11 @@ def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[tupl
 
 
 @FrenchBreakdown.route('/api/fr/getVerb', methods=['POST'])
-def getVerbPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
+def getVerbPhrases():
     data = request.get_json()
     if not data or 'q' not in data:
         return {'error': 'No query provided'}, 400
-    d = nlpES(data['q'])
+    d = nlpFR(data['q'])
 
     verbPattern = [
         {'POS': 'PRON', 'DEP': 'expl:pv', 'OP': '?'}, # Reflexive pronoun in front of main verb (sometimes doesn't work)
@@ -106,7 +110,7 @@ def getVerbPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[
         {'POS': 'AUX', 'OP': '*'},  # Other auxiliary verbs
         {'POS': {'IN': ['VERB', 'AUX']}, 'OP': '+'}  # Main verb
     ]
-    matcher = Matcher(nlpES.vocab)
+    matcher = Matcher(nlpFR.vocab)
     matcher.add('Verb phrases', [verbPattern])
     matches = matcher(d)
     spans = [d[start:end] for _, start, end in matches]
@@ -130,11 +134,11 @@ def getVerbPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[
     return {'verbs': remap_keys(out)}, 200
 
 @FrenchBreakdown.route('/api/fr/getAdj', methods=['POST'])
-def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
+def getAdjPhrases():
     data = request.get_json()
     if not data or 'q' not in data:
         return {'error': 'No query provided'}, 400
-    d = nlpES(data['q'])
+    d = nlpFR(data['q'])
 
     adjectivePattern = [
         [
@@ -177,14 +181,14 @@ def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[s
             {'POS': 'ADJ', 'DEP': 'advmod', 'OP': '+'},  # adverb
         ]
     ]
-    advMatcher = Matcher(nlpES.vocab)
+    advMatcher = Matcher(nlpFR.vocab)
     advMatcher.add('Adjective phrases', adjectivePattern)
     matches = advMatcher(d)
     spans = [d[start:end] for _, start, end in matches]
 
     filtered = filter_spans(spans)
 
-    cconjMatcher = Matcher(nlpES.vocab)
+    cconjMatcher = Matcher(nlpFR.vocab)
     cconjMatcher.add('Conjuntive phrases', cconjPatterns)
     matches = cconjMatcher(d)
     spans = [d[start:end] for _, start, end in matches]
@@ -202,10 +206,10 @@ def getObjects():
     print('Object: ' + str(data))
     if not data or 'q' not in data:
         return {'error': 'No query provided'}, 400
-    d = nlpES(data['q'])
+    d = nlpFR(data['q'])
 
 
-    matcher = Matcher(nlpES.vocab)
+    matcher = Matcher(nlpFR.vocab)
     objectPattern = [
         [
             {'POS': 'ADP', 'OP': '?'},

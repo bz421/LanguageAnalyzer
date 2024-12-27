@@ -14,6 +14,10 @@ from spacy.matcher import Matcher
 
 nlpES = spacy.load('es_dep_news_trf')
 
+"""
+Check language.js for info on the return types of the functions below
+"""
+
 spanishPronoun = {
     ('1', 'Sing'): 'yo',
     ('2', 'Sing'): 'tú',
@@ -27,7 +31,6 @@ def remap_keys(mapping):
     return [{'key': k, 'value': v} for k, v in mapping.items()]
 
 
-# TODO: deal with weird stuff with ser
 def getImplicitSubjects(d):
     implicitPattern = [
         [
@@ -63,7 +66,7 @@ def getImplicitSubjects(d):
 
 
 @SpanishBreakdown.route('/api/es/getSubj', methods=['POST'])
-def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
+def getSubjectPhrase():
     data = request.get_json()
     print('Subject:' + str(data))
     if not data or 'q' not in data:
@@ -97,7 +100,7 @@ def getSubjectPhrase() -> tuple[dict[str, str], int] | tuple[dict[str, list[tupl
 
 
 @SpanishBreakdown.route('/api/es/getVerb', methods=['POST'])
-def getVerbPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
+def getVerbPhrases():
     data = request.get_json()
     if not data or 'q' not in data:
         return {'error': 'No query provided'}, 400
@@ -136,7 +139,7 @@ def getVerbPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[
 
 
 @SpanishBreakdown.route('/api/es/getAdj', methods=['POST'])
-def getAdjPhrases() -> tuple[dict[str, str], int] | tuple[dict[str, list[tuple[str, int, int]]], int]:
+def getAdjPhrases():
     data = request.get_json()
     if not data or 'q' not in data:
         return {'error': 'No query provided'}, 400

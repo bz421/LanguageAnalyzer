@@ -11,6 +11,7 @@ export default function Page() {
     const [verbs, setVerbs] = useState([])
     const [adjs, setAdjs] = useState('')
     const [objs, setObjs] = useState('')
+    const [chengyu, setChengyu] = useState([])
 
     const {lang} = useParams()
 
@@ -23,6 +24,10 @@ export default function Page() {
         getVerbs()
         getAdjs()
         getObjs()
+
+        if (lang === 'zh') {
+            getChengyu()
+        }
     }
 
     const getTranslation = async () => {
@@ -40,6 +45,11 @@ export default function Page() {
         setTranslation(data.result)
     }
 
+    /*
+        JSON object key name: 'subjects'
+        @return JSON object with key 'subjects' and value as an array of tuples.
+                Tuple format: (subject, beginIndex, endIndex)
+     */
     const getSubject = async () => {
         const response = await fetch(`/api/${lang}/getSubj`, {
             method: 'POST',
@@ -60,6 +70,12 @@ export default function Page() {
         setSubjs(out)
     }
 
+    /*
+        JSON object key name: 'verbs'
+        @return JSON object (key, value) pair.
+              - Each key contains tuple of (verb, index)
+              - Each value contains tuple in the format (form, mood, tense, person, number of people)
+     */
     const getVerbs = async () => {
         const response = await fetch(`/api/${lang}/getVerb`, {
             method: 'POST',
@@ -81,6 +97,11 @@ export default function Page() {
         setVerbs(out)
     }
 
+    /*
+        JSON object key name: 'adjectives'
+        @return JSON object with key 'adjectives' and value as an array of tuples.
+                Tuple contains: (adjectivePhrase, beginIndex, endIndex)
+     */
     const getAdjs = async () => {
         const response = await fetch(`/api/${lang}/getAdj`, {
             method: 'POST',
@@ -101,6 +122,12 @@ export default function Page() {
         setAdjs(out)
     }
 
+    /*
+        JSON object key name: 'objects'
+        @return JSON object (key, value) pair.
+              - Each key contains tuple of (verb, index)
+              - Each value contains list of tuples of (object, beginIndex, endIndex)
+     */
     const getObjs = async () => {
         const response = await fetch(`/api/${lang}/getObj`, {
             method: 'POST',
@@ -121,6 +148,28 @@ export default function Page() {
         }
         // out += data.objects[data.objects.length-1]
         setObjs(out)
+    }
+
+    /*
+        @return JSON object with key 'chengyu' and value as an array of dicts. Dict contains:
+                'chengyu_sim': string, 'Pinyin': string, 'Meaning': string
+     */
+    const getChengyu = async () => {
+        const response = await fetch(`/api/zh/getChengyu`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        let out = ''
+        for (let i = 0; i < data.chengyu.length; i++) {
+            out += data.chengyu[i]['chengyu_sim'] + ' ' + data.chengyu[i]['Pinyin'] + ' ' + data.chengyu[i]['Meaning'] + '\n'
+        }
+        setChengyu(out)
     }
 
     const getMessage = async () => {
@@ -162,6 +211,10 @@ export default function Page() {
                 <p>Detected Adjectival/Adverbial Phrases: <b>{adjs}</b></p>
                 <p>Detected Object Phrases: <b>{objs}</b></p>
                 <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p>
+
+                {(lang === 'zh') &&
+                    <p>Detected Chengyu: <p>{chengyu}</p></p>
+                }
 
                 <div class="menu">
                     <button onClick={() => navigate('/')}>Home</button>
