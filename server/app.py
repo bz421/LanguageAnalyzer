@@ -1,4 +1,5 @@
-from flask import Blueprint, Flask
+from flask import Flask
+
 from model import SpanishBreakdown, FrenchBreakdown, ChineseBreakdown, translation
 
 app = Flask(__name__)

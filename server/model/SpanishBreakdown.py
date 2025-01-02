@@ -1,12 +1,7 @@
-from typing import Tuple, Dict, List
-
 import spacy
-from spacy import displacy
-from spacy.tokens import Span
-from spacy.util import filter_spans
-
-from flask import Flask, request
 from flask import Blueprint
+from flask import request
+from spacy.util import filter_spans
 
 SpanishBreakdown = Blueprint('SpanishBreakdown', __name__)
 
@@ -23,6 +18,7 @@ spanishPronoun = {
     ('2', 'Sing'): 'tú',
     ('3', 'Sing'): 'él/ella/usted',
     ('1', 'Plur'): 'nosotros/nosotras',
+    ('2', 'Plur'): 'vosotros/vosotras',
     ('3', 'Plur'): 'ellos/ellas/ustedes'
 }
 

@@ -1,6 +1,7 @@
 import requests
-from flask import Flask, request, Blueprint
 from deep_translator import GoogleTranslator
+from flask import request, Blueprint
+
 translator = GoogleTranslator(source='auto', target='en')
 
 translation = Blueprint('translation', __name__)

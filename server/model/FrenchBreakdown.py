@@ -1,12 +1,7 @@
-from typing import Tuple, Dict, List
-
 import spacy
-from spacy import displacy
-from spacy.tokens import Span
-from spacy.util import filter_spans
-
-from flask import Flask, request
 from flask import Blueprint
+from flask import request
+from spacy.util import filter_spans
 
 FrenchBreakdown = Blueprint('FrenchBreakdown', __name__)
 
@@ -29,7 +24,6 @@ frenchPronoun = {
 def remap_keys(mapping):
     return [{'key': k, 'value': v} for k, v in mapping.items()]
 
-# TODO: deal with weird stuff with être
 def getImplicitSubjects(d):
     implicitPattern = [
         [

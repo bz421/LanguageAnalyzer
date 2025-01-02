@@ -11,7 +11,12 @@ export default function Page() {
     const [verbs, setVerbs] = useState([])
     const [adjs, setAdjs] = useState('')
     const [objs, setObjs] = useState('')
+
+    const [pinyin, setPinyin] = useState([])
     const [chengyu, setChengyu] = useState([])
+    const [ba, setBa] = useState([])
+    const [bei, setBei] = useState([])
+    const [particles, setParticles] = useState([])
 
     const {lang} = useParams()
 
@@ -23,10 +28,16 @@ export default function Page() {
         getSubject()
         getVerbs()
         getAdjs()
-        getObjs()
 
+        if (lang !== 'zh') {
+            getObjs()
+        }
         if (lang === 'zh') {
+            pinyinize()
             getChengyu()
+            // getBa()
+            // getBei()
+            // getParticles()
         }
     }
 
@@ -43,6 +54,21 @@ export default function Page() {
         const data = await response.json()
         console.log(data.result)
         setTranslation(data.result)
+    }
+
+    const pinyinize = async () => {
+        const response = await fetch(`/api/zh/pinyin`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        console.log(data.pinyin)
+        setPinyin(data.pinyin)
     }
 
     /*
@@ -206,13 +232,14 @@ export default function Page() {
                 </form>
                 <p>English Translation: {translation}</p>
                 <p>Detected Language: {lang}</p>
+                { (lang === 'zh') && <p>Pinyin: <b>{pinyin}</b></p> }
                 <p>Detected Subjects: <b>{subjs}</b></p>
                 <p>Detected Verb Phrases: <b>{verbs}</b></p>
                 <p>Detected Adjectival/Adverbial Phrases: <b>{adjs}</b></p>
-                <p>Detected Object Phrases: <b>{objs}</b></p>
-                <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p>
+                { (lang !== 'zh') && <p>Detected Object Phrases: <b>{objs}</b></p> }
+                { (lang !== 'zh') && <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p> }
 
-                {(lang === 'zh') &&
+                { (lang === 'zh') &&
                     <p>Detected Chengyu: <p>{chengyu}</p></p>
                 }
 
