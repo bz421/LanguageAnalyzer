@@ -14,8 +14,8 @@ export default function Page() {
 
     const [pinyin, setPinyin] = useState([])
     const [chengyu, setChengyu] = useState([])
-    const [ba, setBa] = useState([])
-    const [bei, setBei] = useState([])
+    const [baConstructions, setBaConstructions] = useState([])
+    const [beiConstructions, setBeiConstructions] = useState([])
     const [particles, setParticles] = useState([])
 
     const {lang} = useParams()
@@ -35,9 +35,9 @@ export default function Page() {
         if (lang === 'zh') {
             pinyinize()
             getChengyu()
-            // getBa()
-            // getBei()
-            // getParticles()
+            getBaConstructions()
+            getBeiConstructions()
+            getParticles()
         }
     }
 
@@ -72,6 +72,80 @@ export default function Page() {
     }
 
     /*
+        JSON object key name: 'baConstructions'
+        @return JSON object with key 'baConstructions' and value as an array of dictionary of tuples
+        Each array element is one dictionary in the format of
+        {'object': (text, beginIndex, endIndex), 'subject': (text, beginIndex, endIndex), 'verb': (text, beginIndex, endIndex)}
+
+     */
+    const getBaConstructions = async () => {
+        console.log('Ba input: ' + input)
+        const response = await fetch(`/api/zh/getBaConstructions`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        let out = ''
+        for (let i = 0; i < data.baConstructions.length; i++) {
+            out += 'Object: ' + data.baConstructions[i]['object'] + ', '
+            out += 'Subject: ' + data.baConstructions[i]['subject'] + ', '
+            out += 'Verb: ' + data.baConstructions[i]['verb'] + '\n'
+        }
+        setBaConstructions(out)
+    }
+
+    /*
+        JSON object key name: 'beiConstructions'
+        @return JSON object with key 'beiConstructions' and value as an array of dictionary of tuples
+        Each array element is one dictionary in the format of
+        {'object': (text, beginIndex, endIndex), 'subject': (text, beginIndex, endIndex), 'verb': (text, beginIndex, endIndex)}
+
+     */
+    const getBeiConstructions = async () => {
+        const response = await fetch(`/api/zh/getBeiConstructions`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        let out = ''
+        for (let i = 0; i < data.beiConstructions.length; i++) {
+            out += 'Object: ' + data.beiConstructions[i]['object'] + ', '
+            out += 'Subject: ' + data.beiConstructions[i]['subject'] + ', '
+            out += 'Verb: ' + data.beiConstructions[i]['verb'] + '\n'
+        }
+        setBeiConstructions(out)
+    }
+
+    const getParticles = async () => {
+        const response = await fetch(`/api/zh/getParticles`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        let out = ''
+        for (let i = 0; i < data.particles.length - 1; i++) {
+            out += data.particles[i] + ', '
+        }
+        out += data.particles[data.particles.length - 1]
+        setParticles(out)
+    }
+
+    /*
         JSON object key name: 'subjects'
         @return JSON object with key 'subjects' and value as an array of tuples.
                 Tuple format: (subject, beginIndex, endIndex)
@@ -87,7 +161,6 @@ export default function Page() {
             })
         })
         const data = await response.json()
-        console.log('Subjects: ' + data.subjects)
         let out = ''
         for (let i = 0; i < data.subjects.length - 1; i++) {
             out += data.subjects[i] + ', '
@@ -98,9 +171,13 @@ export default function Page() {
 
     /*
         JSON object key name: 'verbs'
-        @return JSON object (key, value) pair.
+        @return
+        Spanish and French: JSON object (key, value) pair.
               - Each key contains tuple of (verb, index)
               - Each value contains tuple in the format (form, mood, tense, person, number of people)
+        Chinese: JSON object with key 'verbs' and value as an array of tuples.
+                 Tuple format: (verbPhrase, beginIndex, endIndex)
+
      */
     const getVerbs = async () => {
         const response = await fetch(`/api/${lang}/getVerb`, {
@@ -113,12 +190,18 @@ export default function Page() {
             })
         })
         const data = await response.json()
-        console.log('Verbs: ' + JSON.stringify(data.verbs))
         let out = ''
-        for (let i = 0; i < data.verbs.length; i++) {
-            const key = data.verbs[i]['key']
-            const value = data.verbs[i]['value']
-            out += key + ': ' + value + "    "
+        if (lang !== 'zh') {
+            for (let i = 0; i < data.verbs.length; i++) {
+                const key = data.verbs[i]['key']
+                const value = data.verbs[i]['value']
+                out += key + ': ' + value + "    "
+            }
+        } else {
+            for (let i = 0; i < data.verbs.length - 1; i++) {
+                out += data.verbs[i] + ', '
+            }
+            out += data.verbs[data.verbs.length - 1]
         }
         setVerbs(out)
     }
@@ -139,7 +222,6 @@ export default function Page() {
             })
         })
         const data = await response.json()
-        console.log('Adjs: ' + data.adjectives)
         let out = ''
         for (let i = 0; i < data.adjectives.length - 1; i++) {
             out += data.adjectives[i] + ', '
@@ -165,7 +247,6 @@ export default function Page() {
             })
         })
         const data = await response.json()
-        console.log('Objs: ' + JSON.stringify(data.objects))
         let out = ''
         for (let i = 0; i < data.objects.length; i++) {
             const key = data.objects[i]['key']
@@ -217,33 +298,39 @@ export default function Page() {
     return (
         <div>
             <p>{msg}</p>
-            <div class="page">
-                <div class="instruction">
+            <div className="page">
+                <div className="instruction">
                     Enter a {lang} text to analyze!
                 </div>
                 <form onSubmit={handleSubmit}>
-                    <input class="text-box"
+                    <input className="text-box"
                            type="text"
                            value={input}
-                           onChange={(e) => setInput(e.target.value)}
+                           onChange={(e) => setInput((e.target.value).trim())}
                            placeholder="Enter a message"
                     />
                     <button type="submit">Analyze</button>
                 </form>
                 <p>English Translation: {translation}</p>
                 <p>Detected Language: {lang}</p>
-                { (lang === 'zh') && <p>Pinyin: <b>{pinyin}</b></p> }
+                {(lang === 'zh') && <p>Pinyin: <b>{pinyin}</b></p>}
                 <p>Detected Subjects: <b>{subjs}</b></p>
                 <p>Detected Verb Phrases: <b>{verbs}</b></p>
                 <p>Detected Adjectival/Adverbial Phrases: <b>{adjs}</b></p>
-                { (lang !== 'zh') && <p>Detected Object Phrases: <b>{objs}</b></p> }
-                { (lang !== 'zh') && <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p> }
+                {(lang !== 'zh') && <p>Detected Object Phrases: <b>{objs}</b></p>}
+                {(lang !== 'zh') && <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p>}
 
-                { (lang === 'zh') &&
-                    <p>Detected Chengyu: <p>{chengyu}</p></p>
+                {(lang === 'zh') &&
+                    <>
+                        <p>Detected Ba(把) Constructions: <b>{baConstructions}</b></p>
+                        <p>Detected Bei(被) Constructions: <b>{beiConstructions}</b></p>
+                        <p>Detected Particles: <b>{particles}</b></p>
+                        <p>Detected Chengyu: <b>{chengyu}</b></p>
+
+                    </>
                 }
 
-                <div class="menu">
+                <div className="menu">
                     <button onClick={() => navigate('/')}>Home</button>
                 </div>
             </div>
