@@ -56,14 +56,7 @@ def getImplicitSubjects(d):
         idx+=1
     return out
 
-@FrenchBreakdown.route('/api/fr/getSubj', methods=['POST'])
-def getSubjectPhrase():
-    data = request.get_json()
-    print('Subject:' + str(data))
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpFR(data['q'])
-
+def getSubjectPhrase(d):
     matcher = Matcher(nlpFR.vocab)
     subjectPattern = [
         [
@@ -87,15 +80,10 @@ def getSubjectPhrase():
     filtered = [(str(f), f.start, f.end) for f in filtered]
     filtered += getImplicitSubjects(d)
 
-    return {'subjects': filtered}, 200
+    return {'subjects': filtered}
 
 
-@FrenchBreakdown.route('/api/fr/getVerb', methods=['POST'])
-def getVerbPhrases():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpFR(data['q'])
+def getVerbPhrases(d):
 
     verbPattern = [
         {'POS': 'PRON', 'DEP': 'expl:pv', 'OP': '?'}, # Reflexive pronoun in front of main verb (sometimes doesn't work)
@@ -125,14 +113,9 @@ def getVerbPhrases():
                     out[(token.text, token.i)] = []
                     out[(token.text, token.i)].append((form, mood, tense, person, number))
 
-    return {'verbs': remap_keys(out)}, 200
+    return {'verbs': remap_keys(out)}
 
-@FrenchBreakdown.route('/api/fr/getAdj', methods=['POST'])
-def getAdjPhrases():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpFR(data['q'])
+def getAdjPhrases(d):
 
     adjectivePattern = [
         [
@@ -183,7 +166,7 @@ def getAdjPhrases():
     filtered = filter_spans(spans)
 
     cconjMatcher = Matcher(nlpFR.vocab)
-    cconjMatcher.add('Conjuntive phrases', cconjPatterns)
+    cconjMatcher.add('Conjunctive phrases', cconjPatterns)
     matches = cconjMatcher(d)
     spans = [d[start:end] for _, start, end in matches]
 
@@ -191,16 +174,11 @@ def getAdjPhrases():
 
     filtered = [(str(f), f.start, f.end) for f in filtered]
 
-    print(filtered)
-    return {'adjectives': filtered}, 200
+    # print(filtered)
+    return {'adjectives': filtered}
 
-@FrenchBreakdown.route('/api/fr/getObj', methods=['POST'])
-def getObjects():
-    data = request.get_json()
-    print('Object: ' + str(data))
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpFR(data['q'])
+def getObjects(d):
+    out = dict()
 
     for token in d:
         # Check if the token is a verb
@@ -246,8 +224,58 @@ def getObjects():
 
     # print('Object before remapping: ' + str(out))
     print('Object after remapping: ' + str(remap_keys(out)))
-    return {'objects': remap_keys(out)}, 200
+    return {'objects': remap_keys(out)}
 
+@FrenchBreakdown.route('/api/fr/getData', methods=['POST'])
+def frenchData():
+    data = request.get_json()
+    if not data or 'q' not in data:
+        return {'error': 'No query provided'}, 400
+    doc = nlpFR(data['q'])
+
+    tokenized = [token.text for token in nlpFR(data['q'])]
+    # print(tokenized)
+
+    subjects = getSubjectPhrase(doc)
+    verbs = getVerbPhrases(doc)
+    adjectives = getAdjPhrases(doc)
+    objects = getObjects(doc)
+
+    out = {'sentence': data['q'], 'tokens': []}
+    for token in tokenized:
+        out['tokens'].append({'text': token, 'tags': [], 'info': None, 'objectReference': []})
+
+    print('Subjects', subjects)
+    print('verbs', verbs)
+    print('adjs', adjectives)
+    print('objs', objects)
+
+    for text, begin, end in subjects['subjects']:
+        for i in range(begin, end):
+            out['tokens'][i]['tags'].append('subject')
+
+    for pair in verbs['verbs']:
+        # for i in range(pair['key'][1], pair['key'][2]):
+        for e in out['tokens'][pair['key'][1]]['tags']:
+            if e == 'subject':
+                out['tokens'][pair['key'][1]]['tags'].remove(e)
+                out['tokens'][pair['key'][1]]['tags'].append('implicit subject')
+        out['tokens'][pair['key'][1]]['tags'].append('verb')
+        out['tokens'][pair['key'][1]]['info'] = pair['value']
+
+    for text, begin, end in adjectives['adjectives']:
+        for i in range(begin, end):
+            out['tokens'][i]['tags'].append('adjective')
+
+    for pair in objects['objects']:
+        for text, begin, end in pair['value']:
+            out['tokens'][pair['key'][1]]['objectReference'].append((begin, end))
+        for obj in pair['value']:
+            for i in range(obj[1], obj[2]):
+                out['tokens'][i]['tags'].append('object')
+
+    # print('out', json.dumps(out, indent=4))
+    return out, 200
 
 print('Ready French')
 # J'irai à l'université dans 3 ans.
