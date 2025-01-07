@@ -202,39 +202,48 @@ def getObjects():
         return {'error': 'No query provided'}, 400
     d = nlpFR(data['q'])
 
+    for token in d:
+        # Check if the token is a verb
+        if token.pos_ == 'VERB':
+            verb = token
+            objects = []
 
-    matcher = Matcher(nlpFR.vocab)
-    objectPattern = [
-        [
-            {'POS': 'ADP', 'OP': '?'},
-            {'POS': 'DET', 'OP': '?'},
-            {'POS': 'NUM', 'DEP': 'nummod', 'OP': '?'},  # number modifier
-            {'POS': 'NOUN', 'DEP': {'IN': ['obj', 'nsubj']}, 'OP': '*'},  # noun being modified
-            {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
-            {'POS': 'ADJ', 'DEP': 'amod', 'OP': '*'},  # adjective
-            {'POS': 'PRON', 'DEP': {'IN': ['obj', 'iobj']}, 'OP': '*'},  # final pronoun
-            {'POS': 'ADP', 'DEP': 'case', 'OP': '?'},  # optional adposition
-            {'POS': 'NOUN', 'DEP': 'nmod', 'OP': '?'}  # optional noun modifier
-        ]
-    ]
-    matcher.add('Object', objectPattern)
-    matches = matcher(d)
-    spans = [d[start:end] for _, start, end, in matches]
-    filtered = filter_spans(spans)
+            # Look for direct objects (obj) and indirect objects (iobj)
+            for child in verb.children:
+                if child.dep_ in ['obj', 'iobj']:
+                    # Extract the full phrase using the subtree but stop at a conjunction
+                    subtree = list(child.subtree)
+                    phrase_start = subtree[0].i
+                    for idx, subtoken in enumerate(subtree):
+                        if subtoken.pos_ == 'CCONJ':
+                            break
+                    else:
+                        idx = len(subtree)
 
-    out = dict()
-    idx = 0
-    for f in filtered:
-        for token in f:
-            if token.dep_ in ['obj', 'iobj']:
-                head = token.head
-                try:
-                    out[(head.text, head.i)].append((filtered[idx].text, filtered[idx].start, filtered[idx].end))
-                except:
-                    out[(head.text, head.i)] = []
-                    out[(head.text, head.i)].append((filtered[idx].text, filtered[idx].start, filtered[idx].end))
+                    phrase_end = subtree[idx - 1].i + 1
+                    object_text = d[phrase_start:phrase_end].text
+                    objects.append((object_text, phrase_start, phrase_end))
 
-        idx += 1
+                    # Check for compound objects linked via conjunctions
+                    for conj in child.children:
+                        if conj.dep_ == 'conj' and conj.pos_ in ['NOUN', 'PRON']:
+                            # Extract the compound object phrase
+                            conj_subtree = list(conj.subtree)
+                            start_idx = conj_subtree[0].i
+                            for j, subtoken in enumerate(conj_subtree):
+                                if subtoken.pos_ == 'CCONJ':
+                                    break
+                            else:
+                                j = len(conj_subtree)
+
+                            end_idx = conj_subtree[j - 1].i + 1
+                            conj_text = d[start_idx:end_idx].text
+                            objects.append((conj_text, start_idx, end_idx))
+
+            # Add the verb and its objects to the output
+            if objects:
+                out[(verb.text, verb.i)] = objects
+
     # print('Object before remapping: ' + str(out))
     print('Object after remapping: ' + str(remap_keys(out)))
     return {'objects': remap_keys(out)}, 200

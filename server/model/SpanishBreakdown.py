@@ -62,12 +62,7 @@ def getImplicitSubjects(d):
 
 
 @SpanishBreakdown.route('/api/es/getSubj', methods=['POST'])
-def getSubjectPhrase():
-    data = request.get_json()
-    print('Subject:' + str(data))
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpES(data['q'])
+def getSubjectPhrase(d):
 
     matcher = Matcher(nlpES.vocab)
     subjectPattern = [
@@ -92,15 +87,11 @@ def getSubjectPhrase():
     filtered = [(str(f), f.start, f.end) for f in filtered]
     filtered += getImplicitSubjects(d)
 
-    return {'subjects': filtered}, 200
+    return {'subjects': filtered}
 
 
 @SpanishBreakdown.route('/api/es/getVerb', methods=['POST'])
-def getVerbPhrases():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpES(data['q'])
+def getVerbPhrases(d):
 
     verbPattern = [
         {'POS': 'PRON', 'DEP': 'expl:pv', 'OP': '?'},
@@ -131,15 +122,11 @@ def getVerbPhrases():
                     out[(token.text, token.i)] = []
                     out[(token.text, token.i)].append((form, mood, tense, person, number))
 
-    return {'verbs': remap_keys(out)}, 200
+    return {'verbs': remap_keys(out)}
 
 
 @SpanishBreakdown.route('/api/es/getAdj', methods=['POST'])
-def getAdjPhrases():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpES(data['q'])
+def getAdjPhrases(d):
 
     adjectivePattern = [
         [
@@ -199,53 +186,110 @@ def getAdjPhrases():
     filtered = [(str(f), f.start, f.end) for f in filtered]
 
     print(filtered)
-    return {'adjectives': filtered}, 200
+    return {'adjectives': filtered}
 
 
 @SpanishBreakdown.route('/api/es/getObj', methods=['POST'])
-def getObjects():
-    data = request.get_json()
-    print('Object: ' + str(data))
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpES(data['q'])
-
-    matcher = Matcher(nlpES.vocab)
-    objectPattern = [
-        [
-            {'POS': 'ADP', 'OP': '?'},
-            {'POS': 'DET', 'OP': '?'},
-            {'POS': 'NUM', 'DEP': 'nummod', 'OP': '?'},  # number modifier
-            {'POS': 'NOUN', 'DEP': {'IN': ['obj', 'nsubj']}, 'OP': '*'},  # noun being modified
-            {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
-            {'POS': 'ADJ', 'DEP': 'amod', 'OP': '*'},  # adjective
-            {'POS': 'PRON', 'DEP': {'IN': ['obj', 'iobj']}, 'OP': '*'},  # final pronoun
-            {'POS': 'ADP', 'DEP': 'case', 'OP': '?'},  # optional adposition
-            {'POS': 'NOUN', 'DEP': 'nmod', 'OP': '?'}  # optional noun modifier
-        ]
-    ]
-    matcher.add('Object', objectPattern)
-    matches = matcher(d)
-    spans = [d[start:end] for _, start, end, in matches]
-    filtered = filter_spans(spans)
-
+def getObjects(d):
     out = dict()
-    idx = 0
-    for f in filtered:
-        for token in f:
-            if token.dep_ in ['obj', 'iobj']:
-                head = token.head
-                try:
-                    out[(head.text, head.i)].append((filtered[idx].text, filtered[idx].start, filtered[idx].end))
-                except:
-                    out[(head.text, head.i)] = []
-                    out[(head.text, head.i)].append((filtered[idx].text, filtered[idx].start, filtered[idx].end))
 
-        idx += 1
+    for token in d:
+        # Check if the token is a verb
+        if token.pos_ == 'VERB':
+            verb = token
+            objects = []
+
+            # Look for direct objects (obj) and indirect objects (iobj)
+            for child in verb.children:
+                if child.dep_ in ['obj', 'iobj']:
+                    # Extract the full phrase using the subtree but stop at a conjunction
+                    subtree = list(child.subtree)
+                    phrase_start = subtree[0].i
+                    for idx, subtoken in enumerate(subtree):
+                        if subtoken.pos_ == 'CCONJ':
+                            break
+                    else:
+                        idx = len(subtree)
+
+                    phrase_end = subtree[idx - 1].i + 1
+                    object_text = d[phrase_start:phrase_end].text
+                    objects.append((object_text, phrase_start, phrase_end))
+
+                    # Check for compound objects linked via conjunctions
+                    for conj in child.children:
+                        if conj.dep_ == 'conj' and conj.pos_ in ['NOUN', 'PRON']:
+                            # Extract the compound object phrase
+                            conj_subtree = list(conj.subtree)
+                            start_idx = conj_subtree[0].i
+                            for j, subtoken in enumerate(conj_subtree):
+                                if subtoken.pos_ == 'CCONJ':
+                                    break
+                            else:
+                                j = len(conj_subtree)
+
+                            end_idx = conj_subtree[j - 1].i + 1
+                            conj_text = d[start_idx:end_idx].text
+                            objects.append((conj_text, start_idx, end_idx))
+
+            # Add the verb and its objects to the output
+            if objects:
+                out[(verb.text, verb.i)] = objects
+
+
     # print('Object before remapping: ' + str(out))
     print('Object after remapping: ' + str(remap_keys(out)))
-    return {'objects': remap_keys(out)}, 200
+    return {'objects': remap_keys(out)}
 
+@SpanishBreakdown.route('/api/es/getData', methods=['POST'])
+def spanishData():
+    data = request.get_json()
+    if not data or 'q' not in data:
+        return {'error': 'No query provided'}, 400
+    doc = nlpES(data['q'])
+
+    tokenized = [token.text for token in nlpES(data['q'])]
+    # print(tokenized)
+
+    subjects = getSubjectPhrase(doc)
+    verbs = getVerbPhrases(doc)
+    adjectives = getAdjPhrases(doc)
+    objects = getObjects(doc)
+
+    out = {'sentence': data['q'], 'tokens': []}
+    for token in tokenized:
+        out['tokens'].append({'text': token, 'tags': [], 'info': None, 'objectReference': []})
+
+    print('Subjects', subjects)
+    print('verbs', verbs)
+    print('adjs', adjectives)
+    print('objs', objects)
+
+    for text, begin, end in subjects['subjects']:
+        for i in range(begin, end):
+            out['tokens'][i]['tags'].append('subject')
+
+    for pair in verbs['verbs']:
+        # for i in range(pair['key'][1], pair['key'][2]):
+        for e in out['tokens'][pair['key'][1]]['tags']:
+            if e == 'subject':
+                out['tokens'][pair['key'][1]]['tags'].remove(e)
+                out['tokens'][pair['key'][1]]['tags'].append('implicit subject')
+        out['tokens'][pair['key'][1]]['tags'].append('verb')
+        out['tokens'][pair['key'][1]]['info'] = pair['value']
+
+    for text, begin, end in adjectives['adjectives']:
+        for i in range(begin, end):
+            out['tokens'][i]['tags'].append('adjective')
+
+    for pair in objects['objects']:
+        for text, begin, end in pair['value']:
+            out['tokens'][pair['key'][1]]['objectReference'].append((begin, end))
+        for obj in pair['value']:
+            for i in range(obj[1], obj[2]):
+                out['tokens'][i]['tags'].append('object')
+
+    # print('out', json.dumps(out, indent=4))
+    return out, 200
 
 print('Ready Spanish')
 # Mi mamá alta quiere bailar con sus mejores amigas.

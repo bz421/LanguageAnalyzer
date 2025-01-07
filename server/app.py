@@ -1,6 +1,7 @@
 from flask import Flask
 
 from model import SpanishBreakdown, FrenchBreakdown, ChineseBreakdown, translation
+# from model import SpanishBreakdown, translation
 
 app = Flask(__name__)
 

@@ -12,6 +12,8 @@ export default function Page() {
     const [adjs, setAdjs] = useState('')
     const [objs, setObjs] = useState('')
 
+    const [data, setData] = useState([])
+
     const [pinyin, setPinyin] = useState([])
     const [chengyu, setChengyu] = useState([])
     const [baConstructions, setBaConstructions] = useState([])
@@ -24,31 +26,37 @@ export default function Page() {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        getTranslation()
-        getSubject()
-        getVerbs()
-        getAdjs()
 
+        const trimmedInput = input.trim()
+        setInput(trimmedInput)
+
+        getTranslation(trimmedInput)
+        // getSubject(trimmedInput)
+        // getVerbs(trimmedInput)
+        // getAdjs(trimmedInput)
+
+        // IE = indo-european, Spanish and French only
         if (lang !== 'zh') {
-            getObjs()
+            getIEData(trimmedInput)
         }
+
         if (lang === 'zh') {
-            pinyinize()
-            getChengyu()
-            getBaConstructions()
-            getBeiConstructions()
-            getParticles()
+            pinyinize(trimmedInput)
+            getChengyu(trimmedInput)
+            getBaConstructions(trimmedInput)
+            getBeiConstructions(trimmedInput)
+            getParticles(trimmedInput)
         }
     }
 
-    const getTranslation = async () => {
+    const getTranslation = async (trimmedInput) => {
         const response = await fetch(`/api/translate`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -56,14 +64,29 @@ export default function Page() {
         setTranslation(data.result)
     }
 
-    const pinyinize = async () => {
+    const getIEData = async (trimmedInput) => {
+        const response = await fetch(`/api/${lang}/getData`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': trimmedInput
+            })
+        })
+        const data = await response.json()
+        console.log('Final data: ' + JSON.stringify(data, null, 2))
+        setData(data)
+    }
+
+    const pinyinize = async (trimmedInput) => {
         const response = await fetch(`/api/zh/pinyin`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -78,7 +101,7 @@ export default function Page() {
         {'object': (text, beginIndex, endIndex), 'subject': (text, beginIndex, endIndex), 'verb': (text, beginIndex, endIndex)}
 
      */
-    const getBaConstructions = async () => {
+    const getBaConstructions = async (trimmedInput) => {
         console.log('Ba input: ' + input)
         const response = await fetch(`/api/zh/getBaConstructions`, {
             method: 'POST',
@@ -86,7 +109,7 @@ export default function Page() {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -106,14 +129,14 @@ export default function Page() {
         {'object': (text, beginIndex, endIndex), 'subject': (text, beginIndex, endIndex), 'verb': (text, beginIndex, endIndex)}
 
      */
-    const getBeiConstructions = async () => {
+    const getBeiConstructions = async (trimmedInput) => {
         const response = await fetch(`/api/zh/getBeiConstructions`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -126,14 +149,14 @@ export default function Page() {
         setBeiConstructions(out)
     }
 
-    const getParticles = async () => {
+    const getParticles = async (trimmedInput) => {
         const response = await fetch(`/api/zh/getParticles`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -150,14 +173,14 @@ export default function Page() {
         @return JSON object with key 'subjects' and value as an array of tuples.
                 Tuple format: (subject, beginIndex, endIndex)
      */
-    const getSubject = async () => {
+    const getSubject = async (trimmedInput) => {
         const response = await fetch(`/api/${lang}/getSubj`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -179,14 +202,14 @@ export default function Page() {
                  Tuple format: (verbPhrase, beginIndex, endIndex)
 
      */
-    const getVerbs = async () => {
+    const getVerbs = async (trimmedInput) => {
         const response = await fetch(`/api/${lang}/getVerb`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -211,14 +234,14 @@ export default function Page() {
         @return JSON object with key 'adjectives' and value as an array of tuples.
                 Tuple contains: (adjectivePhrase, beginIndex, endIndex)
      */
-    const getAdjs = async () => {
+    const getAdjs = async (trimmedInput) => {
         const response = await fetch(`/api/${lang}/getAdj`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -236,14 +259,14 @@ export default function Page() {
               - Each key contains tuple of (verb, index)
               - Each value contains list of tuples of (object, beginIndex, endIndex)
      */
-    const getObjs = async () => {
+    const getObjs = async (trimmedInput) => {
         const response = await fetch(`/api/${lang}/getObj`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -261,14 +284,14 @@ export default function Page() {
         @return JSON object with key 'chengyu' and value as an array of dicts. Dict contains:
                 'chengyu_sim': string, 'Pinyin': string, 'Meaning': string
      */
-    const getChengyu = async () => {
+    const getChengyu = async (trimmedInput) => {
         const response = await fetch(`/api/zh/getChengyu`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
             },
             body: JSON.stringify({
-                'q': input
+                'q': trimmedInput
             })
         })
         const data = await response.json()
@@ -306,7 +329,7 @@ export default function Page() {
                     <input className="text-box"
                            type="text"
                            value={input}
-                           onChange={(e) => setInput((e.target.value).trim())}
+                           onChange={(e) => setInput((e.target.value))}
                            placeholder="Enter a message"
                     />
                     <button type="submit">Analyze</button>
@@ -320,6 +343,8 @@ export default function Page() {
                 {(lang !== 'zh') && <p>Detected Object Phrases: <b>{objs}</b></p>}
                 {(lang !== 'zh') && <p>Verb format goes <b>verb: (form, mood, tense, person, number of people)</b></p>}
 
+                <h4>Full data(check console)</h4>
+                <p>{JSON.stringify(data, null, 2)}</p>
                 {(lang === 'zh') &&
                     <>
                         <p>Detected Ba(把) Constructions: <b>{baConstructions}</b></p>
