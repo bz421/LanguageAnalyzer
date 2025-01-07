@@ -6,7 +6,7 @@ from flask import request
 from spacy.util import filter_spans
 from spacy.tokens import Span
 
-from pypinyin import slug, Style
+from pypinyin import slug, Style, pinyin
 
 ChineseBreakdown = Blueprint('ChineseBreakdown', __name__)
 
@@ -20,200 +20,115 @@ Check language.js for info on the return types of the functions below
 def remap_keys(mapping):
     return [{'key': k, 'value': v} for k, v in mapping.items()]
 
-@ChineseBreakdown.route('/api/zh/pinyin', methods=['POST'])
-def pinyinize():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    out = slug(data['q'], style=Style.TONE, separator=' ')
-    return {'pinyin': out}, 200
+def pinyinize(text):
+    return pinyin(text)
 
-@ChineseBreakdown.route('/api/zh/getSubj', methods=['POST'])
-def getSubjectPhrase():
-    data = request.get_json()
-    print('Subject:' + str(data))
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpZH(data['q'])
-
+def getSubjectPhrase(d):
     subjectPhrases = []
     for sent in d.sents:
         for token in sent:
-            # Identify subjects
             if token.dep_ == 'nsubj' or (token.head.text == '有' and token.dep_ == 'dep'):
                 start = token.i
                 end = token.i
-
-                # Include modifiers or compounds to the left
                 while start > 0 and d[start - 1].dep_ in {'amod', 'compound', 'det', 'nummod', 'nmod:assmod'}:
                     start -= 1
-
-                # Include complements to the right
                 while end < len(d) - 1 and d[end + 1].dep_ in {'case', 'nummod', 'clf'}:
                     end += 1
-
-                # Extract the span and add it to the list of subject phrases
                 span = d[start:end + 1]
                 if (span.text, start, end + 1) not in subjectPhrases:
-                    subjectPhrases.append((span.text, span.start_char, span.end_char))
+                    subjectPhrases.append((span.text, span.start, span.end))
+    return {'subjects': subjectPhrases}
 
-    return {'subjects': subjectPhrases}, 200
+    return {'subjects': subjectPhrases}
 
-@ChineseBreakdown.route('/api/zh/getVerb', methods=['POST'])
-def getVerb():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpZH(data['q'])
-
+def getVerb(d):
     verbPhrases = []
     for sent in d.sents:
         for token in sent:
-            # Identify verbs
             if token.pos_ == "VERB":
-                # Expand to include auxiliary verbs, adverbs, and complements
                 start = token.i
                 end = token.i
-
-                # Include auxiliary verbs or modifiers to the left
                 while start > 0 and d[start - 1].pos_ in {"AUX", "ADV", "PART"}:
                     start -= 1
-
-                # Include complements and particles to the right
                 while end < len(d) - 1 and d[end + 1].pos_ in {"ADV", "PART", "SCONJ", "ADP", "NOUN"}:
                     end += 1
-
-                # Extract the span and add it to the list of verb phrases
                 span = d[start:end + 1]
                 if span.text not in verbPhrases:
-                    verbPhrases.append((span.text, span.start_char, span.end_char))
+                    verbPhrases.append((span.text, span.start, span.end))
+    return {'verbs': verbPhrases}
 
-    return {'verbs': verbPhrases}, 200
-
-@ChineseBreakdown.route('/api/zh/getAdj', methods=['POST'])
-def getAdjPhrases():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpZH(data['q'])
-
+def getAdjPhrases(d):
     adjectivePhrases = []
     for sent in d.sents:
         for token in sent:
-            # Identify adjectives
             if token.pos_ in {"ADJ", 'NUM'}:
-                # print(token.text)
-                # Expand to include adverbs or intensifiers to the left
                 start = token.i
                 end = token.i
-
-                # Include modifiers or intensifiers to the left
                 while start > 0 and d[start - 1].pos_ in {"ADV", "PART"}:
                     start -= 1
-
-                # Include complements or particles to the right
                 while end < len(d) - 1 and d[end + 1].pos_ in {"PART", "ADP", "SCONJ"}:
                     end += 1
-
-                # Extract the span and add it to the list of adjective phrases
                 span = d[start:end + 1]
                 if (span.text, start, end + 1) not in adjectivePhrases:
-                    adjectivePhrases.append((span.text, span.start_char, span.end_char))
+                    adjectivePhrases.append((span.text, span.start, span.end))
+    return {'adjectives': adjectivePhrases}
 
-    return {'adjectives': adjectivePhrases}, 200
-
-@ChineseBreakdown.route('/api/zh/getBaConstructions', methods=['POST'])
-def getBaConstructions():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpZH(data['q'])
-
+def getBaConstructions(d):
     baConstructions = []
     for sent in d.sents:
         for token in sent:
-            # Identify "把" tokens
             if token.text == "把" and token.dep_ == "aux:ba":
-                ba_entry = {"subject": None, "object": None, "verb": None}
-                # Find verb and its subject
+                ba_entry = {'ba': (token.i, token.i + 1), "subject": None, "object": None, "verb": None}
                 for ancestor in token.ancestors:
                     if ancestor.pos_ == "VERB":
-                        ba_entry["verb"] = (ancestor.text, ancestor.idx, ancestor.idx + len(ancestor.text))
+                        ba_entry["verb"] = (ancestor.text, ancestor.i, ancestor.i + 1)
                         for sub in ancestor.children:
                             if sub.dep_ == "nsubj":
-                                ba_entry["subject"] = (sub.text, sub.idx, sub.idx + len(sub.text))
+                                ba_entry["subject"] = (sub.text, sub.i, sub.i + 1)
                                 break
                         break
-
-                # Find object
                 for descendant in token.head.children:
                     if descendant.dep_ in {"dobj", "dep"}:
-                        ba_entry["object"] = (descendant.text, descendant.idx, descendant.idx + len(descendant.text))
+                        ba_entry["object"] = (descendant.text, descendant.i, descendant.i + 1)
                         break
-
                 baConstructions.append(ba_entry)
+    return {'baConstructions': baConstructions}
 
-    return {'baConstructions': baConstructions}, 200
-
-@ChineseBreakdown.route('/api/zh/getBeiConstructions', methods=['POST'])
-def getBeiConstruction():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpZH(data['q'])
-
+def getBeiConstruction(d):
     beiConstructions = []
     for sent in d.sents:
         for token in sent:
-            # Identify "被" tokens
             if token.text == "被" and token.dep_ == "auxpass":
-                bei_entry = {"subject": None, "object": None, "verb": None}
-                # Find verb and its subject
+                bei_entry = {'bei': (token.i, token.i + 1), "subject": None, "object": None, "verb": None}
                 for ancestor in token.ancestors:
                     if ancestor.pos_ == "VERB":
-                        bei_entry["verb"] = (ancestor.text, ancestor.idx, ancestor.idx + len(ancestor.text))
+                        bei_entry["verb"] = (ancestor.text, ancestor.i, ancestor.i + 1)
                         for sub in ancestor.children:
                             if sub.dep_ == "nsubj":
-                                bei_entry["subject"] = (sub.text, sub.idx, sub.idx + len(sub.text))
+                                bei_entry["subject"] = (sub.text, sub.i, sub.i + 1)
                                 break
                         break
-
-                # Find agent (object)
                 countSubj = 0
                 for descendant in token.head.children:
-                    print(descendant.text)
                     if descendant.dep_ == 'nsubjpass':
-                        bei_entry["object"] = (descendant.text, descendant.idx, descendant.idx + len(descendant.text))
+                        bei_entry["object"] = (descendant.text, descendant.i, descendant.i + 1)
                         break
                     elif descendant.dep_ == 'nsubj':
-                        print('nsubj got here', descendant.text)
                         countSubj += 1
                         if countSubj == 1: continue
-
-                        print('trying', descendant.text)
-                        bei_entry["object"] = (descendant.text, descendant.idx, descendant.idx + len(descendant.text))
+                        bei_entry["object"] = (descendant.text, descendant.i, descendant.i + 1)
                         break
-
                 beiConstructions.append(bei_entry)
-
-    return {'beiConstructions': beiConstructions}, 200
+    return {'beiConstructions': beiConstructions}
 
 # TODO: Special handling for "de"(all 3 types)
-@ChineseBreakdown.route('/api/zh/getParticles', methods=['POST'])
-def getParticles():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpZH(data['q'])
-
+def getParticles(d):
     particles = []
-    # Iterate through tokens in the document
     for sent in d.sents:
         for token in sent:
             if token.pos_ == "PART":
-                particles.append((token.text, token.idx, token.idx + len(token.text)))
-
-    return {'particles': particles}, 200
+                particles.append((token.text, token.i, token.i + 1))
+    return {'particles': particles}
 
 def findChengyu(string : str):
     with open('Texts/Chengyu.csv', encoding='utf8') as csvfile:
@@ -223,20 +138,100 @@ def findChengyu(string : str):
                 return dict(row)
     return None
 
-@ChineseBreakdown.route('/api/zh/getChengyu', methods=['POST'])
-def getChengyu():
-    data = request.get_json()
-    if not data or 'q' not in data:
-        return {'error': 'No query provided'}, 400
-    d = nlpZH(data['q'])
-
+def getChengyu(d):
     out = list()
     for token in d:
         chengyuDict = findChengyu(token.text)
         if chengyuDict:
-            out.append(chengyuDict)
+            out.append((chengyuDict, token.i, token.i + 1))
+    return {'chengyu': out}
 
-    print(out)
-    return {'chengyu': out}, 200
+@ChineseBreakdown.route('/api/zh/getData', methods=['POST'])
+def getData():
+    data = request.get_json()
+    if not data or 'q' not in data:
+        return {'error': 'No query provided'}, 400
+    doc = nlpZH(data['q'])
+
+    tokenized = [token.text for token in nlpZH(data['q'])]
+    print(tokenized)
+
+    Pinyin = pinyinize(data['q'])
+    subjects = getSubjectPhrase(doc)
+    verbs = getVerb(doc)
+    adjectives = getAdjPhrases(doc)
+    baConstructions = getBaConstructions(doc)
+    beiConstructions = getBeiConstruction(doc)
+    particles = getParticles(doc)
+    chengyu = getChengyu(doc)
+
+    print("Pinyin:", pinyinize(data['q']))
+    print("Subjects:", getSubjectPhrase(doc))
+    print("Verbs:", getVerb(doc))
+    print("Adjectives:", getAdjPhrases(doc))
+    print("Ba Constructions:", getBaConstructions(doc))
+    print("Bei Constructions:", getBeiConstruction(doc))
+    print("Particles:", getParticles(doc))
+    print("Chengyu:", getChengyu(doc))
+
+    out = {'sentence': data['q'], 'tokens': []}
+    for token in tokenized:
+        out['tokens'].append(
+            {'text': token, 'pinyin': '', 'tags': [], 'baSubjects': [], 'beiSubjects': [], 'baObjects': [], 'beiObjects': [], 'chengyuIndex': None}
+        )
+
+    pinyinI = 0
+    for (idx, token) in enumerate(out['tokens']):
+        # print(i, len(token['text']))
+        token['pinyin'] = Pinyin[pinyinI:pinyinI + len(token['text'])]
+        pinyinI += len(token['text'])
+
+    for text, begin, end in subjects['subjects']:
+        for i in range(begin, end):
+            print(i, text)
+            out['tokens'][i]['tags'].append('subject')
+
+    for text, begin, end in verbs['verbs']:
+        for i in range(begin, end):
+            out['tokens'][i]['tags'].append('verb')
+
+    for text, begin, end in adjectives['adjectives']:
+        for i in range(begin, end):
+            out['tokens'][i]['tags'].append('adjective')
+
+    for text, begin, end in particles['particles']:
+        for i in range(begin, end):
+            out['tokens'][i]['tags'].append('particle')
+
+    for entry in chengyu['chengyu']:
+        for i in range(entry[1], entry[2]):
+            out['tokens'][i]['tags'].append('chengyu')
+            out['tokens'][i]['chengyuIndex'] = entry[0]['idx']
+
+    for entry in baConstructions['baConstructions']:
+        for i in range(entry['ba'][0], entry['ba'][1]):
+            out['tokens'][i]['tags'].append('baParticle')
+        for i in range(entry['verb'][1], entry['verb'][2]):
+            out['tokens'][i]['tags'].append('baVerb')
+            out['tokens'][i]['baSubjects'].append((entry['subject'][1], entry['subject'][2]))
+            out['tokens'][i]['baObjects'].append((entry['object'][1], entry['object'][2]))
+        for i in range(entry['subject'][1], entry['subject'][2]):
+            out['tokens'][i]['tags'].append('baSubject')
+        for i in range(entry['object'][1], entry['object'][2]):
+            out['tokens'][i]['tags'].append('baObject')
+
+    for entry in beiConstructions['beiConstructions']:
+        for i in range(entry['bei'][0], entry['bei'][1]):
+            out['tokens'][i]['tags'].append('beiParticle')
+        for i in range(entry['verb'][1], entry['verb'][2]):
+            out['tokens'][i]['tags'].append('beiVerb')
+            out['tokens'][i]['beiSubjects'].append((entry['subject'][1], entry['subject'][2]))
+            out['tokens'][i]['beiObjects'].append((entry['object'][1], entry['object'][2]))
+        for i in range(entry['subject'][1], entry['subject'][2]):
+            out['tokens'][i]['tags'].append('beiSubject')
+        for i in range(entry['object'][1], entry['object'][2]):
+            out['tokens'][i]['tags'].append('beiObject')
+
+    return out, 200
 
 print('Ready Chinese')
