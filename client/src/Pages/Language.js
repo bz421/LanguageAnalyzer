@@ -2,6 +2,8 @@ import React, {useState, useEffect} from 'react'
 import {useNavigate, useParams} from 'react-router-dom';
 import './styles.css'
 
+import SentenceWrapper from '../Components/SentenceWrapper'
+
 export default function Page() {
     const [msg, setMsg] = useState('')
     const [translation, setTranslation] = useState('')
@@ -98,6 +100,13 @@ export default function Page() {
                 </form>
                 <p>English Translation: {translation}</p>
                 <p>Detected Language: {lang}</p>
+
+                {data && Object.keys(data).length > 0 && (
+                    <div style={{textAlign: 'center'}}>
+                        <h1>Wrapper</h1>
+                        <SentenceWrapper data={data} lang={lang}></SentenceWrapper>
+                    </div>
+                )}
 
                 <h4>Full data(check console)</h4>
                 <p>{JSON.stringify(data, null, 2)}</p>
