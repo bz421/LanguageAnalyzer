@@ -1,7 +1,7 @@
-import React, {useRef, useEffect, useState} from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
 
-export default function CurlyBrace({curlyBraces, widthSVG, heightSVG}) {
+export default function CurlyBrace({ curlyBraces, widthSVG, heightSVG, onHover }) {
     const svgRef = useRef(null);
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
@@ -14,7 +14,7 @@ export default function CurlyBrace({curlyBraces, widthSVG, heightSVG}) {
         const unitY = dy / len;
 
         const qx1 = x1 + q * w * unitY;
-        const qy1 = y1 - q * w * unitX
+        const qy1 = y1 - q * w * unitX;
         const qx2 = x1 - 0.25 * len * unitX + (1 - q) * w * unitY;
         const qy2 = y1 - 0.25 * len * unitY - (1 - q) * w * unitX;
         const tx1 = x1 - 0.5 * len * unitX + w * unitY;
@@ -34,12 +34,13 @@ export default function CurlyBrace({curlyBraces, widthSVG, heightSVG}) {
         );
     }
 
-    // Function to render the curly braces
+    // Function to render the curly braces and annotations
     function renderCurlyBraces() {
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove(); // Clear previous content
 
-        curlyBraces.forEach(({x1, y1, x2, y2, width, q}, index) => {
+        curlyBraces.forEach(({ x1, y1, x2, y2, width, q, annotation }, index) => {
+            // Render the curly brace
             svg
                 .append('path')
                 .attr('d', makeCurlyBrace(x1, y1, x2, y2, width, q))
@@ -47,8 +48,24 @@ export default function CurlyBrace({curlyBraces, widthSVG, heightSVG}) {
                 .style('stroke', hoveredIndex === index ? '#f00' : '#000')
                 .style('stroke-width', '3px')
                 .style('fill', 'none')
-                .on('mouseover', () => setHoveredIndex(index))
-                .on('mouseout', () => setHoveredIndex(null));
+                .on('mouseover', () => {
+                    setHoveredIndex(index);
+                    onHover(index);
+                })
+                .on('mouseout', () => {
+                    setHoveredIndex(null);
+                    onHover(null);
+                });
+
+            // Render the annotation
+            svg
+                .append('text')
+                .attr('x', (x1 + x2) / 2) // Position at the midpoint of the curly brace
+                .attr('y', Math.max(y1, y2) + 40) // Position slightly below the curly brace
+                .attr('text-anchor', 'middle') // Center the text
+                .style('font-size', '15px')
+                .style('fill', '#000')
+                .text(annotation); // Set the annotation text
         });
     }
 
