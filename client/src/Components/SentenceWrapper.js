@@ -105,7 +105,7 @@ export default function SentenceWrapper({ data, lang }) {
         // Update the curlyBraceRanges state
         setCurlyBraceRanges(curlyBraceData);
 
-    }, [data.tokens]); // Recalculate when tokens change
+    }, [data]); // Recalculate when tokens change
 
     return (
         <>
@@ -146,10 +146,11 @@ export default function SentenceWrapper({ data, lang }) {
             </Grid2>
 
             {/* Render the CurlyBrace component with the calculated ranges */}
+            {/*{console.log(curlyBraceRanges)}*/}
             {curlyBraceRanges.length > 0 && (
                 <CurlyBrace
                     curlyBraces={curlyBraceRanges}
-                    widthSVG={tokenRefs.current.length > 0 ? tokenRefs.current[tokenRefs.current.length - 1].getBoundingClientRect().right - tokenRefs.current[0].getBoundingClientRect().x : 0}
+                    widthSVG={tokenRefs.current.length > 0 ? tokenRefs.current[tokenRefs.current.length - 1]?.getBoundingClientRect().right - tokenRefs.current[0].getBoundingClientRect().x : 0}
                     heightSVG={30}
                 />
             )}

@@ -17,5 +17,5 @@ A sentence analyzer application for language-learning that will break up an inpu
     - deep_translator
     - pypinyin
 3. Run the components (in the following order)
-    - Python backend: just run the file using `python <filename>`
+    - Python backend: `python <filename>`(flask) or `waitress-serve --host=0.0.0.0 --port=5000 app:app`(waitress)
     - React webpage: `cd client` then `npm start`
