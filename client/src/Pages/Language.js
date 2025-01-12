@@ -23,6 +23,7 @@ export default function Page() {
         getVerbs()
         getAdjs()
         getObjs()
+        getTrees()
     }
 
     const getTranslation = async () => {
@@ -99,6 +100,20 @@ export default function Page() {
         }
         out += data.adjectives[data.adjectives.length - 1]
         setAdjs(out)
+    }
+
+    const getTrees = async () => {
+        const response = await fetch('/api/getTree', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        console.log('Trees: ' + data)
     }
 
     const getObjs = async () => {
