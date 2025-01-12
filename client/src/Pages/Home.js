@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react'
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import './styles.css'
+import Navbar from "./Navbar";
+import Sidebar from "./Sidebar";
 
 export default function Home() {
     const [msg, setMsg] = useState('')
@@ -21,24 +23,14 @@ export default function Home() {
         getMessage()
     }, [])
     return (
-        <div style={{'display': 'flex', 'flexDirection': 'column', 'justifyContent': 'center', 'alignItems': 'center'}}>
-            <h1>Backend says</h1>
-            <p>{msg}</p>
-
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Enter a message"
-                />
-                <button type="submit">Send</button>
-            </form>
-            <p>English Translation: {translation}</p>
-            <p>Detected Language: {lang}</p>
-            <p>Detected Subjects: <b>{subjs}</b></p>
-            <p>Detected Verb Phrases: <b>{verbs}</b></p>
-            <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
+        <div>
+            <Navbar/>
+            <div class="menu">
+                <button onClick={() => navigate('/language/es/')}>Spanish</button>
+                <button onClick={() => navigate('/language/fr')}>French</button>
+                <button onClick={() => navigate('/language/zh')}>Mandarin</button>
+            </div>
+            <Sidebar/>
         </div>
     )
 }
