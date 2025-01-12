@@ -19,6 +19,8 @@ export default function Language() {
         getSubject()
         getVerbs()
         getAdjs()
+        getObjs()
+        getTrees()
     }
 
     const getTranslation = async () => {
@@ -94,6 +96,42 @@ export default function Language() {
         }
         out += data.adjectives[data.adjectives.length-1]
         setAdjs(out)
+    }
+
+    const getTrees = async () => {
+        const response = await fetch('/api/getTree', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        console.log('Trees: ' + data)
+    }
+
+    const getObjs = async () => {
+        const response = await fetch('/api/getObj', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': input
+            })
+        })
+        const data = await response.json()
+        console.log('Objs: ' + JSON.stringify(data.objects))
+        let out = ''
+        for (let i = 0; i < data.objects.length; i++) {
+            const key = data.objects[i]['key']
+            const value = data.objects[i]['value']
+            out += key + ': ' + value + "    "
+        }
+        // out += data.objects[data.objects.length-1]
+        setObjs(out)
     }
 
     const getMessage = async () => {

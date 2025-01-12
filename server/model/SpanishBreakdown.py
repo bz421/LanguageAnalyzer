@@ -223,6 +223,57 @@ def getObjects():
     print('Object after remapping: ' + str(remap_keys(out)))
     return {'objects': remap_keys(out)}, 200
 
+@SpanishBreakdown.route('/api/getTree', methods=['POST'])
+def getTree():
+    data = request.get_json()
+    print('Object: ' + str(data))
+    if not data or 'q' not in data:
+        return {'error': 'No query provided'}, 400
+    d = nlpES(data['q'])
+
+    tokenList = []
+    tokenSubtrees = []
+    
+    for token in d:
+        # print(list(token.subtree))
+        tokenList.append(token)
+        tokenSubtrees.append(token.subtree)
+
+    # matcher = Matcher(nlpES.vocab)
+    # objectPattern = [
+    #     [
+    #         {'POS': 'ADP', 'OP': '?'},
+    #         {'POS': 'DET', 'OP': '?'},
+    #         {'POS': 'NOUN', 'DEP': {'IN': ['obj', 'nsubj']}, 'OP': '*'},
+    #         {'POS': 'ADV', 'DEP': 'advmod', 'OP': '?'},  # optional adverb(modifier for adjective)
+    #         {'POS': 'ADJ', 'DEP': 'amod', 'OP': '*'},  # adjective
+    #         {'POS': 'PRON', 'DEP': {'IN': ['obj', 'iobj']}, 'OP': '*'}, # final pronoun
+    #         {'POS': 'ADP', 'DEP': 'case', 'OP': '?'}, # optional adposition
+    #         {'POS': 'NOUN', 'DEP': 'nmod', 'OP': '?'} # optional noun modifier
+    #     ]
+    # ]
+    # matcher.add('Object', objectPattern)
+    # matches = matcher(d)
+    # spans = [d[start:end] for _, start, end, in matches]
+    # filtered = filter_spans(spans)
+
+    # out = dict()
+    # idx = 0
+    # for f in filtered:
+    #     for token in f:
+    #         if token.dep_ in ['obj', 'iobj']:
+    #             head = token.head
+    #             try:
+    #                 out[(head.text, head.i)].append((filtered[idx].text, filtered[idx].start, filtered[idx].end))
+    #             except:
+    #                 out[(head.text, head.i)] = []
+    #                 out[(head.text, head.i)].append((filtered[idx].text, filtered[idx].start, filtered[idx].end))
+
+        # idx += 1
+    # print('Object before remapping: ' + str(out))
+    # print('Object after remapping: ' + str(remap_keys(out)))
+    return {'objects': {'tokens': tokenList, 'trees': tokenSubtrees}}, 200
+
 
 print('Ready')
 # Mi mamá alta quiere bailar con sus mejores amigas.
