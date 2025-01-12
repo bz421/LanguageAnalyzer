@@ -76,3 +76,67 @@ export default function CurlyBrace({ curlyBraces, widthSVG, heightSVG, onHover, 
 
     return <svg ref={svgRef} height={heightSVG} width={widthSVG}></svg>;
 }
+
+/*
+function tagToInt(tag) {
+    switch (tag) {
+        case 'subject':
+            return 0;
+        case 'baSubject':
+            return 1;
+        case 'beiSubject':
+            return 2;
+        case 'implicit subject':
+            return 3;
+        case 'verb':
+            return 4;
+        case 'baVerb':
+            return 5;
+        case 'adjective':
+            return 6;
+        case 'object':
+            return 7;
+        case 'baObject':
+            return 8;
+        case 'beiObject':
+            return 9;
+        case 'particles':
+            return 10;
+        case 'chengyu':
+            return 11;
+        default:
+            return -1;
+    }
+}
+
+function intToTag(int) {
+    switch (int) {
+        case 0:
+            return 'subject phrase';
+        case 1:
+            return 'baSubject';
+        case 2:
+            return 'beiSubject';
+        case 3:
+            return 'implicit subject';
+        case 4:
+            return 'verb phrase';
+        case 5:
+            return 'baVerb';
+        case 6:
+            return 'adjectival phrase';
+        case 7:
+            return 'object';
+        case 8:
+            return 'baObject';
+        case 9:
+            return 'beiObject';
+        case 10:
+            return 'particles';
+        case 11:
+            return 'chengyu';
+        default:
+            return '';
+    }
+}
+*/

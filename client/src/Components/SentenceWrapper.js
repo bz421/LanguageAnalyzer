@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { Box, Grid2 } from '@mui/material';
+import React, {useState, useEffect, useRef} from 'react';
+import {Box, Grid2, Modal} from '@mui/material';
 import CurlyBrace from './CurlyBrace';
 
 function tagToInt(tag) {
@@ -65,86 +65,147 @@ function intToTag(int) {
 }
 
 function calculateCurlyBraceRanges(data, tokenRefs) {
-    let tags = [[], [], [], [], [], [], [], [], [], [], [], []];
+    const tags = Array.from({length: 12}, () => []);
+
     for (let i = 0; i < data.tokens.length; i++) {
         for (const tag of data.tokens[i].tags) {
-            if (tagToInt(tag) !== -1) {
-                tags[tagToInt(tag)].push(i);
+            if (tag === 'implicit subject') continue
+            const tagIdx = tagToInt(tag);
+            if (tagIdx !== -1) {
+                tags[tagIdx].push(i);
             }
         }
     }
 
-    for (let i = 0; i < tags.length; i++) {
-        let ranges = [];
+    const ranges = tags.flatMap((indices, tagIdx) => {
+        const layerRanges = [];
         let start = -1;
         let end = -1;
-        for (let j = 0; j < tags[i].length; j++) {
+
+        for (let i = 0; i < indices.length; i++) {
             if (start === -1) {
-                start = tags[i][j];
-                end = tags[i][j];
-            } else if (tags[i][j] === end + 1) {
-                end = tags[i][j];
+                start = indices[i];
+                end = indices[i];
+            } else if (indices[i] === end + 1) {
+                end = indices[i];
             } else {
-                ranges.push([start, end]);
-                start = tags[i][j];
-                end = tags[i][j];
+                layerRanges.push({start, end});
+                start = indices[i];
+                end = indices[i];
             }
         }
         if (start !== -1) {
-            ranges.push([start, end]);
+            layerRanges.push({start, end});
         }
-        tags[i] = ranges;
-    }
+
+        return layerRanges.map(({start, end}) => ({start, end, tagIdx}));
+    });
 
     const leftBound = tokenRefs.current[0]?.getBoundingClientRect().x || 0;
 
-    return tags.flatMap((arr, tagIdx) =>
-        arr.map((range) => {
-            const coordInfo1 = tokenRefs.current[range[0]]?.getBoundingClientRect();
-            const coordInfo2 = tokenRefs.current[range[1]]?.getBoundingClientRect();
+    const curlyBraces = [];
+    ranges.forEach(({start, end, tagIdx}) => {
+        const coord1 = tokenRefs.current[start]?.getBoundingClientRect();
+        const coord2 = tokenRefs.current[end]?.getBoundingClientRect();
 
-            if (!coordInfo1 || !coordInfo2) return null;
+        if (!coord1 || !coord2) return;
 
-            if (range[0] === range[1]) {
-                const X1 = coordInfo1.x - leftBound;
-                const X2 = coordInfo1.right - leftBound;
-                return { x1: X1, y1: 0, x2: X2, y2: 0, width: 20, q: 0.5, annotation: intToTag(tagIdx), range };
-            } else {
-                const X1 = (coordInfo1.right - coordInfo1.x) / 2 + coordInfo1.x - leftBound;
-                const X2 = (coordInfo2.right - coordInfo2.x) / 2 + coordInfo2.x - leftBound;
-                return { x1: X1, y1: 0, x2: X2, y2: 0, width: 20, q: 0.5, annotation: intToTag(tagIdx), range };
-            }
-        }).filter((range) => range !== null)
-    );
+        const x1 = coord1.x - leftBound;
+        const x2 = coord2.right - leftBound;
+        const centerX1 = (coord1.right - coord1.x) / 2 + coord1.x - leftBound;
+        const centerX2 = (coord2.right - coord2.x) / 2 + coord2.x - leftBound;
+
+        curlyBraces.push({
+            x1: start === end ? coord1.x - leftBound : centerX1,
+            x2: start === end ? coord1.right - leftBound : centerX2,
+            width: 20,
+            y1: 0,
+            y2: 0,
+            q: 0.5,
+            annotation: intToTag(tagIdx),
+            range: [start, end],
+            layer: 0, // Initialize layer
+        });
+    });
+
+    // Adjust layers to account for braces two tokens away
+    curlyBraces.forEach((current, i) => {
+        let layer = 0;
+
+        while (
+            curlyBraces.some((other, j) => {
+                if (i === j) return false;
+
+                const overlap = current.layer === other.layer;
+                const isTooClose =
+                    Math.abs(current.range[0] - other.range[1]) <= 1 ||
+                    Math.abs(current.range[1] - other.range[0]) <= 1;
+
+                return overlap && isTooClose;
+            })
+            ) {
+            layer++;
+            current.layer = layer;
+        }
+    });
+
+    // Adjust vertical positioning based on layers
+    curlyBraces.forEach((brace) => {
+        brace.y1 = brace.layer * 20; // Offset each layer by 30 pixels
+        brace.y2 = brace.layer * 20;
+    });
+
+    return curlyBraces;
 }
 
-export default function SentenceWrapper({ data, lang }) {
+
+export default function SentenceWrapper({data, lang}) {
     const [hoverIndex, setHoverIndex] = useState(null);
     const [curlyBraceRanges, setCurlyBraceRanges] = useState([]);
     const [hoveredCurlyBraceIndex, setHoveredCurlyBraceIndex] = useState(null);
     const [clickedCurlyBraceIndex, setClickedCurlyBraceIndex] = useState(null);
+    const [popupInfo, setPopupInfo] = useState(null);
+
     const tokenRefs = useRef([]);
 
-    const handleMouseEnter = (index) => {
-        setHoverIndex(index);
-    };
-
-    const handleMouseLeave = () => {
-        setHoverIndex(null);
-    };
+    const handleMouseEnter = (index) => setHoverIndex(index);
+    const handleMouseLeave = () => setHoverIndex(null);
 
     useEffect(() => {
-        const updateCurlyBraceRanges = () => {
+        const updateCurlyBraces = () => {
             const ranges = calculateCurlyBraceRanges(data, tokenRefs);
             setCurlyBraceRanges(ranges);
-        };
+        }
 
         const timeoutId = setTimeout(() => {
-            updateCurlyBraceRanges()
-        }, 50)
+            requestAnimationFrame(updateCurlyBraces)
+        }, 0)
 
         return () => clearTimeout(timeoutId)
     }, [data]);
+
+    const handleTokenClick = (token) => {
+        if (token.tags.includes('implicit subject')) {
+            console.log(token.info[0])
+            const form = token.info[0][0][0] === "Fin" ? "finite" : "infinitive"
+            const mood = token.info[0][1][0] === "Ind" ? 'indicative' : token.info[0][1][0] === 'Sub' ? 'subjunctive' : token.info[0][1][0] === 'Imp' ? 'imperative' : token.info[0][1][0] === 'Cnd' ? 'conditional' : 'N/A'
+            const tense = token.info[0][2][0] === "Pres" ? 'present' : token.info[0][2][0] === 'Pa    st' ? 'past' : token.info[0][2][0] === 'Imp' ? 'imperfect' : token.info[0][2][0] === 'Fut' ? 'future' : token.info[0][2][0] === 'Cnd' ? 'conditional' : 'N/A'
+            const person = token.info[0][3][0] ?? 'N/A'
+            const number = token.info[0][4][0] === "Sing" ? 'singular' : token.info[0][4][0] === 'Plur' ? 'plural' : 'N/A'
+
+            token.details = `Form: ${form}, Mood: ${mood}, Tense: ${tense}, Person: ${person}, Number: ${number}`
+
+            setPopupInfo({
+                title: token.text,
+                sentence: data.sentence.replace(token.text, `<b>${token.text}</b>`),
+                description: `<b>${token.text}</b> serves as the implicit subject of this sentence.`,
+                details: token.details,
+                end: lang === 'es' ? `See more on <a href="https://www.spanishdict.com/conjugate/${token.text}">SpanishDict</a>` : lang === 'fr' ? `See more on <a href="https://wordreference.com/conj/frverbs.aspx?v=${token.text}">WordReference</a>` : null
+            });
+        }
+    };
+
+    const handleClosePopup = () => setPopupInfo(null);
 
     const exclude = ['baSubject', 'beiSubject', 'baObject', 'beiObject', 'baVerb'];
     const filteredBasBeis = curlyBraceRanges.filter(
@@ -157,19 +218,34 @@ export default function SentenceWrapper({ data, lang }) {
 
     return (
         <>
-            <Grid2 container spacing={2} justifyContent="space-evenly" flexWrap='wrap'>
+            <Grid2 container spacing={2} justifyContent="space-evenly" flexWrap="wrap">
                 {data.tokens.map((token, index) => (
                     <Grid2 item key={index}>
                         <Box
-                            ref={(el) => tokenRefs.current[index] = el}
+                            ref={(el) => (tokenRefs.current[index] = el)}
                             sx={{
                                 textAlign: 'center',
                                 padding: '8px',
-                                border: '2px solid #0f0',
+                                border: token.tags.includes('implicit subject')
+                                    ? '2px solid red'
+                                    : '2px solid #0f0',
                                 borderRadius: '4px',
                                 margin: '8px',
-                                backgroundColor: hoverIndex === index || (hoveredCurlyBraceIndex !== null && (filteredBasBeis[hoveredCurlyBraceIndex]?.range[0] <= index && index <= filteredBasBeis[hoveredCurlyBraceIndex]?.range[1])) || (clickedCurlyBraceIndex !== null && (filteredBasBeis[clickedCurlyBraceIndex]?.range[0] <= index && index <= filteredBasBeis[clickedCurlyBraceIndex]?.range[1])) ? '#e0e0e0' : 'transparent',
+                                backgroundColor:
+                                    hoverIndex === index ||
+                                    (hoveredCurlyBraceIndex !== null &&
+                                        filteredBasBeis[hoveredCurlyBraceIndex]?.range[0] <= index &&
+                                        index <= filteredBasBeis[hoveredCurlyBraceIndex]?.range[1]) ||
+                                    (clickedCurlyBraceIndex !== null &&
+                                        filteredBasBeis[clickedCurlyBraceIndex]?.range[0] <= index &&
+                                        index <= filteredBasBeis[clickedCurlyBraceIndex]?.range[1])
+                                        ? '#e0e0e0'
+                                        : 'transparent',
+                                cursor: token.tags.includes('implicit subject')
+                                    ? 'pointer'
+                                    : 'default'
                             }}
+                            onClick={() => handleTokenClick(token)}
                             onMouseEnter={() => handleMouseEnter(index)}
                             onMouseLeave={handleMouseLeave}
                         >
@@ -181,7 +257,16 @@ export default function SentenceWrapper({ data, lang }) {
                                     textAlign: 'center',
                                     padding: '8px',
                                     borderRadius: '4px',
-                                    backgroundColor: hoverIndex === index || (hoveredCurlyBraceIndex !== null && (filteredBasBeis[hoveredCurlyBraceIndex]?.range[0] <= index && index <= filteredBasBeis[hoveredCurlyBraceIndex]?.range[1])) || (clickedCurlyBraceIndex !== null && (filteredBasBeis[clickedCurlyBraceIndex]?.range[0] <= index && index <= filteredBasBeis[clickedCurlyBraceIndex]?.range[1])) ? '#e0e0e0' : 'transparent',
+                                    backgroundColor:
+                                        hoverIndex === index ||
+                                        (hoveredCurlyBraceIndex !== null &&
+                                            filteredBasBeis[hoveredCurlyBraceIndex]?.range[0] <= index &&
+                                            index <= filteredBasBeis[hoveredCurlyBraceIndex]?.range[1]) ||
+                                        (clickedCurlyBraceIndex !== null &&
+                                            filteredBasBeis[clickedCurlyBraceIndex]?.range[0] <= index &&
+                                            index <= filteredBasBeis[clickedCurlyBraceIndex]?.range[1])
+                                            ? '#e0e0e0'
+                                            : 'transparent',
                                     margin: '8px',
                                     marginTop: '4px',
                                 }}
@@ -198,12 +283,40 @@ export default function SentenceWrapper({ data, lang }) {
             {filteredBasBeis.length > 0 && (
                 <CurlyBrace
                     curlyBraces={filteredBasBeis}
-                    widthSVG={tokenRefs.current.length > 0 ? tokenRefs.current[tokenRefs.current.length - 1]?.getBoundingClientRect().right - tokenRefs.current[0].getBoundingClientRect().x : 0}
-                    heightSVG={50}
+                    widthSVG={
+                        tokenRefs.current.length > 0
+                            ? tokenRefs.current[tokenRefs.current.length - 1]?.getBoundingClientRect().right -
+                            tokenRefs.current[0].getBoundingClientRect().x
+                            : 0
+                    }
+                    heightSVG={100} // Adjust height to account for multiple rows
                     onHover={setHoveredCurlyBraceIndex}
                     onClick={handleCurlyBraceClick}
                 />
             )}
+
+            <Modal open={Boolean(popupInfo)} onClose={handleClosePopup}>
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 400,
+                        bgcolor: 'background.paper',
+                        border: '2px solid #000',
+                        boxShadow: 24,
+                        p: 4,
+                    }}
+                >
+                    <h2>{popupInfo?.title}</h2>
+                    <p dangerouslySetInnerHTML={{__html: popupInfo?.sentence}}></p>
+                    <p dangerouslySetInnerHTML={{__html: popupInfo?.description}}></p>
+                    <p dangerouslySetInnerHTML={{__html: popupInfo?.details.replace(/, /g, '<br/>')}}></p>
+                    {popupInfo?.end && <p dangerouslySetInnerHTML={{__html: popupInfo?.end}}></p>}
+                    <button onClick={handleClosePopup}>Close</button>
+                </Box>
+            </Modal>
         </>
     );
 }
