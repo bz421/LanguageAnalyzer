@@ -9,8 +9,12 @@ export default function App() {
     return (
         <div>
             <Router>
+                <Navbar />
+                <Sidebar />
                 <Routes>
                     <Route path='/' exact element={<Home />} />
+                    <Route path='/language/:lang' element = {<Language/>}/>
+
                     <Route path='/language/:lang' element = {<Language/>}/>
                 </Routes>
             </Router>
