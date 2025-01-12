@@ -27,7 +27,7 @@ export default function Page() {
     }
 
     const getTranslation = async () => {
-        const response = await fetch('/api/translate', {
+        const response = await fetch(`/api/translate`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -42,7 +42,7 @@ export default function Page() {
     }
 
     const getSubject = async () => {
-        const response = await fetch('/api/getSubj', {
+        const response = await fetch(`/api/${lang}/getSubj`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -62,7 +62,7 @@ export default function Page() {
     }
 
     const getVerbs = async () => {
-        const response = await fetch('/api/getVerb', {
+        const response = await fetch(`/api/${lang}/getVerb`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -83,7 +83,7 @@ export default function Page() {
     }
 
     const getAdjs = async () => {
-        const response = await fetch('/api/getAdj', {
+        const response = await fetch(`/api/${lang}/getAdj`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -117,7 +117,7 @@ export default function Page() {
     }
 
     const getObjs = async () => {
-        const response = await fetch('/api/getObj', {
+        const response = await fetch(`/api/${lang}/getObj`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -139,7 +139,7 @@ export default function Page() {
     }
 
     const getMessage = async () => {
-        await fetch('/api/hello').then(
+        await fetch(`/api/hello`).then(
             res => res.json()
         ).then(
             data => {
