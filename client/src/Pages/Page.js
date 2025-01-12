@@ -9,13 +9,10 @@ export default function Page() {
     const [subjs, setSubjs] = useState([])
     const [verbs, setVerbs] = useState([])
     const [adjs, setAdjs] = useState('')
-<<<<<<<< HEAD:client/src/Pages/Page.js
-========
     const [objs, setObjs] = useState('')
 
     const {lang} = useParams()
 
->>>>>>>> ea4548e87b1ef6e782aa110113b400c80d5ac592:client/src/Pages/Language.js
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
@@ -24,19 +21,16 @@ export default function Page() {
         getSubject()
         getVerbs()
         getAdjs()
-<<<<<<<< HEAD:client/src/Pages/Page.js
     }
 
     const getTranslation = async () => {
         const response = await fetch('api/translate', {
-========
         getObjs()
         getTrees()
     }
 
     const getTranslation = async () => {
         const response = await fetch(`/api/translate`, {
->>>>>>>> ea4548e87b1ef6e782aa110113b400c80d5ac592:client/src/Pages/Language.js
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -51,11 +45,8 @@ export default function Page() {
     }
 
     const getSubject = async () => {
-<<<<<<<< HEAD:client/src/Pages/Page.js
         const response = await fetch('api/getSubj', {
-========
         const response = await fetch(`/api/${lang}/getSubj`, {
->>>>>>>> ea4548e87b1ef6e782aa110113b400c80d5ac592:client/src/Pages/Language.js
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -75,11 +66,8 @@ export default function Page() {
     }
 
     const getVerbs = async () => {
-<<<<<<<< HEAD:client/src/Pages/Page.js
         const response = await fetch('api/getVerb', {
-========
         const response = await fetch(`/api/${lang}/getVerb`, {
->>>>>>>> ea4548e87b1ef6e782aa110113b400c80d5ac592:client/src/Pages/Language.js
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -91,26 +79,20 @@ export default function Page() {
         const data = await response.json()
         console.log('Verbs: ' + data.verbs)
         let out = ''
-<<<<<<<< HEAD:client/src/Pages/Page.js
         for (let i=0; i<data.verbs.length-1; i++) {
             out += data.verbs[i] + ', '
-========
         for (let i = 0; i < data.verbs.length; i++) {
             const key = data.verbs[i]['key']
             const value = data.verbs[i]['value']
             out += key + ': ' + value + "    "
->>>>>>>> ea4548e87b1ef6e782aa110113b400c80d5ac592:client/src/Pages/Language.js
         }
         out += data.verbs[data.verbs.length-1]
         setVerbs(out)
     }
 
     const getAdjs = async () => {
-<<<<<<<< HEAD:client/src/Pages/Page.js
         const response = await fetch('api/getAdj', {
-========
         const response = await fetch(`/api/${lang}/getAdj`, {
->>>>>>>> ea4548e87b1ef6e782aa110113b400c80d5ac592:client/src/Pages/Language.js
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'
@@ -129,8 +111,6 @@ export default function Page() {
         setAdjs(out)
     }
 
-<<<<<<<< HEAD:client/src/Pages/Page.js
-========
     const getTrees = async () => {
         const response = await fetch('/api/getTree', {
             method: 'POST',
@@ -167,7 +147,6 @@ export default function Page() {
         setObjs(out)
     }
 
->>>>>>>> ea4548e87b1ef6e782aa110113b400c80d5ac592:client/src/Pages/Language.js
     const getMessage = async () => {
         await fetch(`/api/hello`).then(
             res => res.json()
@@ -183,7 +162,6 @@ export default function Page() {
     useEffect(() => {
         getMessage()
     }, [])
-<<<<<<<< HEAD:client/src/Pages/Page.js
 
     return (
         <div class="page">
@@ -206,7 +184,6 @@ export default function Page() {
             <p>Detected Adjectival Phrases: <b>{adjs}</b></p>
 
             <p>hola este es Español</p>
-========
 
     return (
         <div>
@@ -236,7 +213,6 @@ export default function Page() {
                     <button onClick={() => navigate('/')}>Home</button>
                 </div>
             </div>
->>>>>>>> ea4548e87b1ef6e782aa110113b400c80d5ac592:client/src/Pages/Language.js
         </div>
     )
 }
