@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {Box, Grid2, Modal} from '@mui/material';
 import CurlyBrace from './CurlyBrace';
+import {ArcherContainer, ArcherElement} from 'react-archer'
 
 function tagToInt(tag) {
     switch (tag) {
@@ -76,6 +77,7 @@ function calculateCurlyBraceRanges(data, tokenRefs) {
             }
         }
     }
+    console.log(tags)
 
     const ranges = tags.flatMap((indices, tagIdx) => {
         const layerRanges = [];
@@ -185,78 +187,213 @@ export default function SentenceWrapper({data, lang}) {
     }, [data]);
 
     const handleTokenClick = (token) => {
-        if (token.tags.includes('implicit subject')) {
-            console.log(token.info[0])
-            const form = token.info[0][0][0] === "Fin" ? "finite" : "infinitive"
-            const mood = token.info[0][1][0] === "Ind" ? 'indicative' : token.info[0][1][0] === 'Sub' ? 'subjunctive' : token.info[0][1][0] === 'Imp' ? 'imperative' : token.info[0][1][0] === 'Cnd' ? 'conditional' : 'N/A'
-            const tense = token.info[0][2][0] === "Pres" ? 'present' : token.info[0][2][0] === 'Pa    st' ? 'past' : token.info[0][2][0] === 'Imp' ? 'imperfect' : token.info[0][2][0] === 'Fut' ? 'future' : token.info[0][2][0] === 'Cnd' ? 'conditional' : 'N/A'
-            const person = token.info[0][3][0] ?? 'N/A'
-            const number = token.info[0][4][0] === "Sing" ? 'singular' : token.info[0][4][0] === 'Plur' ? 'plural' : 'N/A'
+        if (token.tags.includes('implicit subject') && lang !== 'zh') {
+            const form = token.info[0][0][0] === "Fin" ? "finite" : "infinitive";
+            const mood = token.info[0][1][0] === "Ind" ? 'indicative' : token.info[0][1][0] === 'Sub' ? 'subjunctive' : token.info[0][1][0] === 'Imp' ? 'imperative' : token.info[0][1][0] === 'Cnd' ? 'conditional' : 'N/A';
+            const tense = token.info[0][2][0] === "Pres" ? 'present' : token.info[0][2][0] === 'Past' ? 'past' : token.info[0][2][0] === 'Imp' ? 'imperfect' : token.info[0][2][0] === 'Fut' ? 'future' : token.info[0][2][0] === 'Cnd' ? 'conditional' : 'N/A';
+            const person = token.info[0][3][0] ?? 'N/A';
+            const number = token.info[0][4][0] === "Sing" ? 'singular' : token.info[0][4][0] === 'Plur' ? 'plural' : 'N/A';
+            let objects = [];
+            for (const range of token.objectReference) {
+                const arr = data.tokens.slice(range[0], range[1]);
+                let stmnt = '';
+                for (const token of arr) {
+                    if (!['.', ',', '，', '。'].includes(token.text)) {
+                        stmnt += token.text + ' ';
+                    }
+                }
+                objects.push(stmnt.trim());
+            }
+            console.log(objects)
+            let objectStmnt = data.sentence;
+            for (const obj of objects) {
+                objectStmnt = objectStmnt.replace(obj, `<b style="color: blue;">${obj}</b>`);
+            }
+            objectStmnt = objectStmnt.replace(token.text, `<b style="color: red;">${token.text}</b>`);
 
-            token.details = `Form: ${form}, Mood: ${mood}, Tense: ${tense}, Person: ${person}, Number: ${number}`
+            token.details = `Form: ${form}, Mood: ${mood}, Tense: ${tense}, Person: ${person}, Number: ${number}`;
+
+            const objectDescriptions = objects.map(obj => `<b style="color: blue;">${obj}</b> is an object of <b style="color: red;">${token.text}</b> in this sentence`).join('<br/>');
 
             setPopupInfo({
                 title: token.text,
-                sentence: data.sentence.replace(token.text, `<b>${token.text}</b>`),
-                description: `<b>${token.text}</b> serves as the implicit subject of this sentence.`,
+                sentence: objectStmnt,
+                description: `<b style"color: red;">${token.text}</b> serves as the implicit subject of this sentence.`,
+                details: token.details,
+                objects: objectDescriptions,
+                end: lang === 'es' ? `See more on <a href="https://www.spanishdict.com/conjugate/${token.text}">SpanishDict</a>` : lang === 'fr' ? `See more on <a href="https://wordreference.com/conj/frverbs.aspx?v=${token.text}">WordReference</a>` : null
+            });
+        } else if (token.tags.includes('verb') && lang !== 'zh') {
+            const form = token.info[0][0][0] === "Fin" ? "finite" : "infinitive";
+            const mood = token.info[0][1][0] === "Ind" ? 'indicative' : token.info[0][1][0] === 'Sub' ? 'subjunctive' : token.info[0][1][0] === 'Imp' ? 'imperative' : token.info[0][1][0] === 'Cnd' ? 'conditional' : 'N/A';
+            const tense = token.info[0][2][0] === "Pres" ? 'present' : token.info[0][2][0] === 'Past' ? 'past' : token.info[0][2][0] === 'Imp' ? 'imperfect' : token.info[0][2][0] === 'Fut' ? 'future' : token.info[0][2][0] === 'Cnd' ? 'conditional' : 'N/A';
+            const person = token.info[0][3][0] ?? 'N/A';
+            const number = token.info[0][4][0] === "Sing" ? 'singular' : token.info[0][4][0] === 'Plur' ? 'plural' : 'N/A';
+
+            token.details = `Form: ${form}, Mood: ${mood}, Tense: ${tense}, Person: ${person}, Number: ${number}`;
+
+            setPopupInfo({
+                title: token.text,
+                sentence: data.sentence.replace(token.text, `<b style="color: red;">${token.text}</b>`),
+                description: `<b style="color: red;">${token.text}</b> is a conjugated verb in this sentence.`,
                 details: token.details,
                 end: lang === 'es' ? `See more on <a href="https://www.spanishdict.com/conjugate/${token.text}">SpanishDict</a>` : lang === 'fr' ? `See more on <a href="https://wordreference.com/conj/frverbs.aspx?v=${token.text}">WordReference</a>` : null
             });
         }
-    };
 
-    const handleClosePopup = () => setPopupInfo(null);
+        // Handle ba and bei constructions
+        if (lang === 'zh') {
+            let subjects = []
+            let verbs = []
+            let objects = []
+            if (token.tags.includes('baParticle')) {
+                for (const subj of token.baSubjects) {
+                    const arr = data.tokens.slice(subj[0], subj[1]);
+                    let stmnt = '';
+                    for (const token of arr) {
+                        if (!['。', '，', '.', ','].includes(token.text)) {
+                            stmnt += token.text;
+                        }
+                    }
+                    subjects.push(stmnt.trim());
+                }
 
-    const exclude = ['baSubject', 'beiSubject', 'baObject', 'beiObject', 'baVerb'];
-    const filteredBasBeis = curlyBraceRanges.filter(
-        (range) => !exclude.includes(range.annotation)
-    );
+                for (const verb of token.baVerbs) {
+                    const arr = data.tokens.slice(verb[0], verb[1]);
+                    let stmnt = '';
+                    for (const token of arr) {
+                        if (!['。', '，', '.', ','].includes(token.text)) {
+                            stmnt += token.text;
+                        }
+                    }
+                    verbs.push(stmnt.trim());
+                }
 
-    const handleCurlyBraceClick = (index) => {
-        setClickedCurlyBraceIndex((prevIndex) => (prevIndex === index ? null : index));
-    };
+                for (const obj of token.baObjects) {
+                    const arr = data.tokens.slice(obj[0], obj[1]);
+                    let stmnt = '';
+                    for (const token of arr) {
+                        if (!['。', '，', '.', ','].includes(token.text)) {
+                            stmnt += token.text;
+                        }
+                    }
+                    objects.push(stmnt.trim());
+                }
 
-    return (
-        <>
-            <Grid2 container spacing={2} justifyContent="space-evenly" flexWrap="wrap">
-                {data.tokens.map((token, index) => (
-                    <Grid2 item key={index}>
-                        <Box
-                            ref={(el) => (tokenRefs.current[index] = el)}
-                            sx={{
-                                textAlign: 'center',
-                                padding: '8px',
-                                border: token.tags.includes('implicit subject')
-                                    ? '2px solid red'
-                                    : '2px solid #0f0',
-                                borderRadius: '4px',
-                                margin: '8px',
-                                backgroundColor:
-                                    hoverIndex === index ||
-                                    (hoveredCurlyBraceIndex !== null &&
-                                        filteredBasBeis[hoveredCurlyBraceIndex]?.range[0] <= index &&
-                                        index <= filteredBasBeis[hoveredCurlyBraceIndex]?.range[1]) ||
-                                    (clickedCurlyBraceIndex !== null &&
-                                        filteredBasBeis[clickedCurlyBraceIndex]?.range[0] <= index &&
-                                        index <= filteredBasBeis[clickedCurlyBraceIndex]?.range[1])
-                                        ? '#e0e0e0'
-                                        : 'transparent',
-                                cursor: token.tags.includes('implicit subject')
-                                    ? 'pointer'
-                                    : 'default'
-                            }}
-                            onClick={() => handleTokenClick(token)}
-                            onMouseEnter={() => handleMouseEnter(index)}
-                            onMouseLeave={handleMouseLeave}
-                        >
-                            {token.text}
-                        </Box>
-                        {lang === 'zh' && (
+
+                let stmnt = data.sentence;
+                for (const subj of subjects) {
+                    stmnt = stmnt.replace(subj, `<b style="color: orange;">${subj}</b>`);
+                }
+                for (const verb of verbs) {
+                    stmnt = stmnt.replace(verb, `<b style="color: green;">${verb}</b>`);
+                }
+                for (const obj of objects) {
+                    stmnt = stmnt.replace(obj, `<b style="color: blue;">${obj}</b>`);
+                }
+                stmnt = stmnt.replace(token.text, `<b style="color: violet">${token.text}</b>`)
+
+
+                const baDescription = subjects.map(subj => `<b style="color: orange;">${subj}</b> is the subject of in this sentence`).join('<br/>') + '<br/>' +
+                    verbs.map(verb => `<b style="color: green;">${verb}</b> is the verb of in this sentence`).join('<br/>') + '<br/>' +
+                    objects.map(obj => `<b style="color: blue;">${obj}</b> is an object in this sentence`).join('<br/>');
+
+                setPopupInfo({
+                    title: '把(ba) Construction',
+                    sentence: stmnt,
+                    description: `<b style="color: violet;">${token.text}</b> signifies a Subject-Object-Verb(SOV) construction. Learn more about it <a href="https://en.wikipedia.org/wiki/B%C7%8E_construction">here</a>`,
+                    details: baDescription,
+                });
+            } else if (token.tags.includes('beiParticle')) {
+                for (const subj of token.beiSubjects) {
+                    const arr = data.tokens.slice(subj[0], subj[1]);
+                    let stmnt = '';
+                    for (const token of arr) {
+                        if (!['。', '，', '.', ','].includes(token.text)) {
+                            stmnt += token.text;
+                        }
+                    }
+                    subjects.push(stmnt.trim());
+                }
+
+                for (const verb of token.beiVerbs) {
+                    const arr = data.tokens.slice(verb[0], verb[1]);
+                    let stmnt = '';
+                    for (const token of arr) {
+                        if (!['。', '，', '.', ','].includes(token.text)) {
+                            stmnt += token.text;
+                        }
+                    }
+                    verbs.push(stmnt.trim());
+                }
+
+                for (const obj of token.beiObjects) {
+                    const arr = data.tokens.slice(obj[0], obj[1]);
+                    let stmnt = '';
+                    for (const token of arr) {
+                        if (!['。', '，', '.', ','].includes(token.text)) {
+                            stmnt += token.text;
+                        }
+                    }
+                    objects.push(stmnt.trim());
+                }
+
+                let stmnt = data.sentence;
+                for (const subj of subjects) {
+                    stmnt = stmnt.replace(subj, `<b style="color: orange;">${subj}</b>`);
+                }
+                for (const verb of verbs) {
+                    stmnt = stmnt.replace(verb, `<b style="color: green;">${verb}</b>`);
+                }
+                for (const obj of objects) {
+                    stmnt = stmnt.replace(obj, `<b style="color: blue;">${obj}</b>`);
+                }
+                stmnt = stmnt.replace(token.text, `<b style="color: violet">${token.text}</b>`)
+
+                const beiDescription = subjects.map(subj => `<b style="color: orange;">${subj}</b> is the subject of in this sentence`).join('<br/>') + '<br/>' +
+                    verbs.map(verb => `<b style="color: green;">${verb}</b> is the verb of in this sentence`).join('<br/>') + '<br/>' +
+                    objects.map(obj => `<b style="color: blue;">${obj}</b> is an object in this sentence`).join('<br/>');
+
+                console.log(beiDescription)
+                setPopupInfo({
+                    title: '被(bei) Construction',
+                    sentence: stmnt,
+                    description: `<b style="color: violet;">${token.text}</b> signifies a <b>passive</b> Subject-Object-Verb(SOV) construction. Learn more about it <a href="https://www.bing.com/search?q=bei+construction+wiki+chinese&qs=n&form=QBRE&sp=-1&ghc=1&lq=0&pq=bei+construction+wiki+c&sc=12-23&sk=&cvid=1248233E1AB04B8B83ADDC5CD1445974&ghsh=0&ghacc=0&ghpl=">here</a>`,
+                    details: beiDescription,
+                })
+            }
+        }
+    }
+        const handleClosePopup = () => setPopupInfo(null);
+
+        const exclude = ['baSubject', 'beiSubject', 'baObject', 'beiObject', 'baVerb'];
+        const filteredBasBeis = curlyBraceRanges.filter(
+            (range) => !exclude.includes(range.annotation)
+        );
+
+        const handleCurlyBraceClick = (index) => {
+            setClickedCurlyBraceIndex((prevIndex) => (prevIndex === index ? null : index));
+        };
+
+        return (
+            <>
+                <Grid2 container spacing={2} justifyContent="space-evenly" flexWrap="wrap">
+                    {data.tokens.map((token, index) => (
+                        <Grid2 item key={index}>
                             <Box
+                                ref={(el) => (tokenRefs.current[index] = el)}
                                 sx={{
                                     textAlign: 'center',
                                     padding: '8px',
+                                    border: token.tags.includes('implicit subject')
+                                        ? '2px solid red'
+                                        : token.tags.includes('verb')
+                                            ? '2px solid blue'
+                                            : token.tags.includes('baParticle')
+                                                ? '2px solid violet'
+                                                : '2px solid #0f0',
                                     borderRadius: '4px',
+                                    margin: '8px',
                                     backgroundColor:
                                         hoverIndex === index ||
                                         (hoveredCurlyBraceIndex !== null &&
@@ -267,56 +404,83 @@ export default function SentenceWrapper({data, lang}) {
                                             index <= filteredBasBeis[clickedCurlyBraceIndex]?.range[1])
                                             ? '#e0e0e0'
                                             : 'transparent',
-                                    margin: '8px',
-                                    marginTop: '4px',
+                                    cursor: token.tags.includes('implicit subject') || token.tags.includes('verb') || token.tags.includes('baParticle')
+                                        ? 'pointer'
+                                        : 'default'
                                 }}
+                                onClick={() => handleTokenClick(token)}
                                 onMouseEnter={() => handleMouseEnter(index)}
                                 onMouseLeave={handleMouseLeave}
                             >
-                                {token.pinyin}
+                                {token.text}
                             </Box>
-                        )}
-                    </Grid2>
-                ))}
-            </Grid2>
+                            {lang === 'zh' && (
+                                <Box
+                                    sx={{
+                                        textAlign: 'center',
+                                        padding: '8px',
+                                        borderRadius: '4px',
+                                        backgroundColor:
+                                            hoverIndex === index ||
+                                            (hoveredCurlyBraceIndex !== null &&
+                                                filteredBasBeis[hoveredCurlyBraceIndex]?.range[0] <= index &&
+                                                index <= filteredBasBeis[hoveredCurlyBraceIndex]?.range[1]) ||
+                                            (clickedCurlyBraceIndex !== null &&
+                                                filteredBasBeis[clickedCurlyBraceIndex]?.range[0] <= index &&
+                                                index <= filteredBasBeis[clickedCurlyBraceIndex]?.range[1])
+                                                ? '#e0e0e0'
+                                                : 'transparent',
+                                        margin: '8px',
+                                        marginTop: '4px',
+                                    }}
+                                    onMouseEnter={() => handleMouseEnter(index)}
+                                    onMouseLeave={handleMouseLeave}
+                                >
+                                    {token.pinyin}
+                                </Box>
+                            )}
+                        </Grid2>
+                    ))}
+                </Grid2>
 
-            {filteredBasBeis.length > 0 && (
-                <CurlyBrace
-                    curlyBraces={filteredBasBeis}
-                    widthSVG={
-                        tokenRefs.current.length > 0
-                            ? tokenRefs.current[tokenRefs.current.length - 1]?.getBoundingClientRect().right -
-                            tokenRefs.current[0].getBoundingClientRect().x
-                            : 0
-                    }
-                    heightSVG={100} // Adjust height to account for multiple rows
-                    onHover={setHoveredCurlyBraceIndex}
-                    onClick={handleCurlyBraceClick}
-                />
-            )}
+                {filteredBasBeis.length > 0 && (
+                    <CurlyBrace
+                        curlyBraces={filteredBasBeis}
+                        widthSVG={
+                            tokenRefs.current.length > 0
+                                ? tokenRefs.current[tokenRefs.current.length - 1]?.getBoundingClientRect().right -
+                                tokenRefs.current[0].getBoundingClientRect().x
+                                : 0
+                        }
+                        heightSVG={100} // Adjust height to account for multiple rows
+                        onHover={setHoveredCurlyBraceIndex}
+                        onClick={handleCurlyBraceClick}
+                    />
+                )}
 
-            <Modal open={Boolean(popupInfo)} onClose={handleClosePopup}>
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: 400,
-                        bgcolor: 'background.paper',
-                        border: '2px solid #000',
-                        boxShadow: 24,
-                        p: 4,
-                    }}
-                >
-                    <h2>{popupInfo?.title}</h2>
-                    <p dangerouslySetInnerHTML={{__html: popupInfo?.sentence}}></p>
-                    <p dangerouslySetInnerHTML={{__html: popupInfo?.description}}></p>
-                    <p dangerouslySetInnerHTML={{__html: popupInfo?.details.replace(/, /g, '<br/>')}}></p>
-                    {popupInfo?.end && <p dangerouslySetInnerHTML={{__html: popupInfo?.end}}></p>}
-                    <button onClick={handleClosePopup}>Close</button>
-                </Box>
-            </Modal>
-        </>
-    );
-}
+                <Modal open={Boolean(popupInfo)} onClose={handleClosePopup}>
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: 400,
+                            bgcolor: 'background.paper',
+                            border: '2px solid #000',
+                            boxShadow: 24,
+                            p: 4,
+                        }}
+                    >
+                        <h2>{popupInfo?.title}</h2>
+                        <p dangerouslySetInnerHTML={{__html: popupInfo?.sentence}}></p>
+                        <p dangerouslySetInnerHTML={{__html: popupInfo?.description}}></p>
+                        <p dangerouslySetInnerHTML={{__html: popupInfo?.details.replace(/, /g, '<br/>')}}></p>
+                        <p dangerouslySetInnerHTML={{__html: popupInfo?.objects}}></p>
+                        {popupInfo?.end && <p dangerouslySetInnerHTML={{__html: popupInfo?.end}}></p>}
+                        <button onClick={handleClosePopup}>Close</button>
+                    </Box>
+                </Modal>
+            </>
+        );
+    }

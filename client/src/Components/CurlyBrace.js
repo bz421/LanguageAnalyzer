@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, {useRef, useEffect, useState} from 'react';
+import {Box} from '@mui/material';
 import * as d3 from 'd3';
 
-export default function CurlyBrace({ curlyBraces, widthSVG, heightSVG, onHover, onClick }) {
+export default function CurlyBrace({curlyBraces, widthSVG, heightSVG, onHover, onClick}) {
     const svgRef = useRef(null);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [clickedIndex, setClickedIndex] = useState(null);
@@ -38,7 +39,7 @@ export default function CurlyBrace({ curlyBraces, widthSVG, heightSVG, onHover, 
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove();
 
-        curlyBraces.forEach(({ x1, y1, x2, y2, width, q, annotation }, index) => {
+        curlyBraces.forEach(({x1, y1, x2, y2, width, q, annotation}, index) => {
             svg
                 .append('path')
                 .attr('d', makeCurlyBrace(x1, y1, x2, y2, width, q))
@@ -71,72 +72,17 @@ export default function CurlyBrace({ curlyBraces, widthSVG, heightSVG, onHover, 
     }
 
     useEffect(() => {
-        renderCurlyBraces();
+        // console.log('Render curly braces')
+        renderCurlyBraces()
     }, [curlyBraces, hoveredIndex, clickedIndex]);
 
-    return <svg ref={svgRef} height={heightSVG} width={widthSVG}></svg>;
+    return (
+        <svg
+            overflow='visible'
+            ref={svgRef}
+            height={heightSVG} // Increase the height
+            width={widthSVG} // Increase the width
+            // viewBox={`0 0 ${widthSVG} ${heightSVG}`}
+        ></svg>
+    );
 }
-
-/*
-function tagToInt(tag) {
-    switch (tag) {
-        case 'subject':
-            return 0;
-        case 'baSubject':
-            return 1;
-        case 'beiSubject':
-            return 2;
-        case 'implicit subject':
-            return 3;
-        case 'verb':
-            return 4;
-        case 'baVerb':
-            return 5;
-        case 'adjective':
-            return 6;
-        case 'object':
-            return 7;
-        case 'baObject':
-            return 8;
-        case 'beiObject':
-            return 9;
-        case 'particles':
-            return 10;
-        case 'chengyu':
-            return 11;
-        default:
-            return -1;
-    }
-}
-
-function intToTag(int) {
-    switch (int) {
-        case 0:
-            return 'subject phrase';
-        case 1:
-            return 'baSubject';
-        case 2:
-            return 'beiSubject';
-        case 3:
-            return 'implicit subject';
-        case 4:
-            return 'verb phrase';
-        case 5:
-            return 'baVerb';
-        case 6:
-            return 'adjectival phrase';
-        case 7:
-            return 'object';
-        case 8:
-            return 'baObject';
-        case 9:
-            return 'beiObject';
-        case 10:
-            return 'particles';
-        case 11:
-            return 'chengyu';
-        default:
-            return '';
-    }
-}
-*/
