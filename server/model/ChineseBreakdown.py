@@ -6,9 +6,12 @@ from flask import request
 from spacy.util import filter_spans
 from spacy.tokens import Span
 
+from deep_translator import GoogleTranslator
+
 from pypinyin import slug, Style, pinyin
 
 ChineseBreakdown = Blueprint('ChineseBreakdown', __name__)
+translator = GoogleTranslator(source='zh-CN', target='en')
 
 from spacy.matcher import Matcher
 nlpZH = spacy.load('zh_core_web_trf')
@@ -146,6 +149,9 @@ def getChengyu(d):
             out.append((chengyuDict, token.i, token.i + 1))
     return {'chengyu': out}
 
+# def translate_text(text):
+#     return translator.translate(text)
+
 @ChineseBreakdown.route('/api/zh/getData', methods=['POST'])
 def getData():
     data = request.get_json()
@@ -177,7 +183,7 @@ def getData():
     out = {'sentence': data['q'], 'tokens': []}
     for token in tokenized:
         out['tokens'].append(
-            {'text': token, 'pinyin': '', 'tags': [], 'baSubjects': [], 'beiSubjects': [], 'baObjects': [], 'beiObjects': [], 'chengyuIndex': None}
+            {'text': token, 'translation': translator.translate(token), 'pinyin': '', 'tags': [], 'baSubjects': [], 'beiSubjects': [], 'baObjects': [], 'beiObjects': [], 'baVerbs': [], 'beiVerbs': [], 'chengyuIndex': None, 'chengyuDetails': ''}
         )
 
     pinyinI = 0
@@ -207,10 +213,14 @@ def getData():
         for i in range(entry[1], entry[2]):
             out['tokens'][i]['tags'].append('chengyu')
             out['tokens'][i]['chengyuIndex'] = entry[0]['idx']
+            out['tokens'][i]['chengyuDetails'] = entry[0]['Meaning']
 
     for entry in baConstructions['baConstructions']:
         for i in range(entry['ba'][0], entry['ba'][1]):
             out['tokens'][i]['tags'].append('baParticle')
+            out['tokens'][i]['baVerbs'].append((entry['verb'][1], entry['verb'][2]))
+            out['tokens'][i]['baSubjects'].append((entry['subject'][1], entry['subject'][2]))
+            out['tokens'][i]['baObjects'].append((entry['object'][1], entry['object'][2]))
         for i in range(entry['verb'][1], entry['verb'][2]):
             out['tokens'][i]['tags'].append('baVerb')
             out['tokens'][i]['baSubjects'].append((entry['subject'][1], entry['subject'][2]))
@@ -223,6 +233,9 @@ def getData():
     for entry in beiConstructions['beiConstructions']:
         for i in range(entry['bei'][0], entry['bei'][1]):
             out['tokens'][i]['tags'].append('beiParticle')
+            out['tokens'][i]['beiVerbs'].append((entry['verb'][1], entry['verb'][2]))
+            out['tokens'][i]['beiSubjects'].append((entry['subject'][1], entry['subject'][2]))
+            out['tokens'][i]['beiObjects'].append((entry['object'][1], entry['object'][2]))
         for i in range(entry['verb'][1], entry['verb'][2]):
             out['tokens'][i]['tags'].append('beiVerb')
             out['tokens'][i]['beiSubjects'].append((entry['subject'][1], entry['subject'][2]))
@@ -231,6 +244,18 @@ def getData():
             out['tokens'][i]['tags'].append('beiSubject')
         for i in range(entry['object'][1], entry['object'][2]):
             out['tokens'][i]['tags'].append('beiObject')
+
+    # for entry in beiConstructions['beiConstructions']:
+    #     for i in range(entry['bei'][0], entry['bei'][1]):
+    #         out['tokens'][i]['tags'].append('beiParticle')
+    #     for i in range(entry['verb'][1], entry['verb'][2]):
+    #         out['tokens'][i]['tags'].append('beiVerb')
+    #         out['tokens'][i]['beiSubjects'].append((entry['subject'][1], entry['subject'][2]))
+    #         out['tokens'][i]['beiObjects'].append((entry['object'][1], entry['object'][2]))
+    #     for i in range(entry['subject'][1], entry['subject'][2]):
+    #         out['tokens'][i]['tags'].append('beiSubject')
+    #     for i in range(entry['object'][1], entry['object'][2]):
+    #         out['tokens'][i]['tags'].append('beiObject')
 
     return out, 200
 

@@ -2,8 +2,10 @@ import spacy
 from flask import Blueprint
 from flask import request
 from spacy.util import filter_spans
+from deep_translator import GoogleTranslator
 
 FrenchBreakdown = Blueprint('FrenchBreakdown', __name__)
+translator = GoogleTranslator(source='fr', target='en')
 
 from spacy.matcher import Matcher
 nlpFR = spacy.load('fr_dep_news_trf')
@@ -100,8 +102,8 @@ def getVerbPhrases(d):
     out = dict()
 
     for f in filtered:
-        for token in f:
-            if token.pos_ == 'VERB':
+        for token in f :
+            if token.pos_ == 'VERB' or token.lemma_.upper() == 'ÊTRE':
                 form = token.morph.get('VerbForm', ['Not applicable'])
                 mood = token.morph.get('Mood', ['Not applicable'])
                 tense = token.morph.get('Tense', ['Not applicable'])
@@ -243,7 +245,7 @@ def frenchData():
 
     out = {'sentence': data['q'], 'tokens': []}
     for token in tokenized:
-        out['tokens'].append({'text': token, 'tags': [], 'info': None, 'objectReference': []})
+        out['tokens'].append({'text': token, 'translation': translator.translate(token), 'tags': [], 'info': None, 'objectReference': []})
 
     print('Subjects', subjects)
     print('verbs', verbs)

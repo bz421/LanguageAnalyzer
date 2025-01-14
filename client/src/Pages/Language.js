@@ -132,6 +132,7 @@ export default function Page() {
                                 
                             </div>
 
+<<<<<<< HEAD
                             <div class="text-box-container">
                                 <form onSubmit={handleSubmit}>
                                     <textarea className="text-box"
@@ -155,6 +156,10 @@ export default function Page() {
 
                 }
                 
+=======
+                <h4>Full data(check console)</h4>
+                {/*<p>{JSON.stringify(data, null, 2)}</p>*/}
+>>>>>>> d36d82c312cc378ba43fbb8d9161fb81f4ede7c0
 
                 <div className="menu">
                     <button onClick={() => navigate('/')}>Home</button>

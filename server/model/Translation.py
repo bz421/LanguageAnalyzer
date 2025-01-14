@@ -31,6 +31,8 @@ def translate():
     language = r.json()[2]
     return {'result': result, 'language': language}, 200
 
+# @translation.route()
+
 
 @translation.route('/api/hello')
 def hello_world():
