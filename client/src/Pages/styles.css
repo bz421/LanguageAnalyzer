@@ -131,12 +131,15 @@ form>button:hover{
     text-align: center;
 }
 
-.close {
+.clear-button {
     display: flex;
     justify-self: end;
     border: none;
     background-color: transparent;
     margin-left: auto;
+
+    width: 25px;
+    height: 25px;
 }
 
 .centered-container {

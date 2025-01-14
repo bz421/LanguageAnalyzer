@@ -5,6 +5,8 @@ import './styles.css';
 import Sidebar from '../Components/Sidebar';
 import SentenceWrapper from '../Components/SentenceWrapper';
 import Alert from '@mui/material/Alert';
+import {IconButton} from '@mui/material'
+import ClearIcon from '@mui/icons-material/Clear';
 
 export default function Page() {
     const [msg, setMsg] = useState('');
@@ -112,9 +114,13 @@ export default function Page() {
                 {hasInput && showResult ? (
                     <div className="centered-container">
                         <div className="text-display">{input}
-                            <button className="close" onClick={clearInput}>
-                                X
-                            </button>
+                            {/*<button className="clear-button" onClick={clearInput}>*/}
+                            {/*    X*/}
+                            {/*</button>*/}
+                            <IconButton style={{marginLeft: 'auto'}} className="clear-button" onClick={clearInput}>
+                                <ClearIcon/>
+                            </IconButton>
+
                         </div>
                         <div className="result centered-container">
                             <p><b>Translation: {translation}</b></p>
