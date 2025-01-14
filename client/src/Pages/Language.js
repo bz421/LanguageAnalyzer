@@ -1,170 +1,157 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
-import './styles.css'
+import './styles.css';
+
+import Sidebar from '../Components/Sidebar';
+import SentenceWrapper from '../Components/SentenceWrapper';
+import Alert from '@mui/material/Alert';
 
 export default function Page() {
-    const [msg, setMsg] = useState('')
-    const [translation, setTranslation] = useState('')
-    const [input, setInput] = useState('')
-    const [hasInput, setHasInput] = useState(false)
+    const [msg, setMsg] = useState('');
+    const [translation, setTranslation] = useState('');
+    const [input, setInput] = useState('');
+    const [hasInput, setHasInput] = useState(false);
     const [showResult, setShowResult] = useState(false);
+    const [data, setData] = useState([]);
+    const [wrongLang, setWrongLang] = useState(false);
+    const [actualLang, setActualLang] = useState('');
+    const {lang} = useParams();
 
-
-    // const [subjs, setSubjs] = useState([])
-    // const [verbs, setVerbs] = useState([])
-    // const [adjs, setAdjs] = useState('')
-    // const [objs, setObjs] = useState('')
-
-    const [data, setData] = useState([])
-
-    // const [pinyin, setPinyin] = useState([])
-    // const [chengyu, setChengyu] = useState([])
-    // const [baConstructions, setBaConstructions] = useState([])
-    // const [beiConstructions, setBeiConstructions] = useState([])
-    // const [particles, setParticles] = useState([])
-
-    const {lang} = useParams()
-
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
-        const trimmedInput = input.trim()
-        setInput(trimmedInput)
+        const trimmedInput = input.trim();
+        setInput(trimmedInput);
 
-        getTranslation(trimmedInput)
-        getData(trimmedInput)
+        await getTranslation(trimmedInput);
+        await getData(trimmedInput);
 
         setShowResult(true);
-    }
+    };
 
     const getTranslation = async (trimmedInput) => {
         const response = await fetch(`/api/translate`, {
             method: 'POST',
             headers: {
-                'Content-type': 'application/json'
+                'Content-type': 'application/json',
             },
             body: JSON.stringify({
-                'q': trimmedInput
-            })
-        })
-        const data = await response.json()
-        console.log(data.result)
-        setTranslation(data.result)
-    }
+                q: trimmedInput,
+            }),
+        });
+        const data = await response.json();
+        if (data.language === 'zh-CN' || data.language === 'zh-TW') data.language = 'zh';
+        console.log(data);
+        setTranslation(data.result);
+        setActualLang(data.language);
+        setWrongLang(data.language !== lang);
+    };
 
     const getData = async (trimmedInput) => {
         const response = await fetch(`/api/${lang}/getData`, {
             method: 'POST',
             headers: {
-                'Content-type': 'application/json'
+                'Content-type': 'application/json',
             },
             body: JSON.stringify({
-                'q': trimmedInput
-            })
-        })
-        const data = await response.json()
-        console.log('Final data: ' + JSON.stringify(data, null, 2))
-        setData(data)
-    }
+                q: trimmedInput,
+            }),
+        });
+        const data = await response.json();
+        console.log('Final data: ' + JSON.stringify(data, null, 2));
+        setData(data);
+    };
 
     const getMessage = async () => {
-        await fetch(`/api/hello`).then(
-            res => res.json()
-        ).then(
-            data => {
-                setMsg(data.message)
-                console.log(data.message)
-            }
-        )
-    }
+        await fetch(`/api/hello`)
+            .then((res) => res.json())
+            .then((data) => {
+                setMsg(data.message);
+                console.log(data.message);
+            });
+    };
 
     const handleInputChange = (e) => {
-        const value = e.target.value
-        setInput(value)
-        if(value.trim().length == 0) {
-            setHasInput(false)
-            setShowResult(false)
+        const value = e.target.value;
+        setInput(value);
+        if (value.trim().length === 0) {
+            setHasInput(false);
+            setShowResult(false);
         } else {
-            setHasInput(true)
+            setHasInput(true);
         }
-        
-    }
+    };
 
     useEffect(() => {
-        getMessage()
-    }, [])
+        getMessage();
+    }, []);
 
+    const map = {es: 'Spanish', fr: 'French', zh: 'Chinese'};
     return (
         <div>
-            <p>{msg}</p>
+            <Sidebar/>
             <div className="page">
-                
-                
-                {/* <p>Detected Language: {lang}</p> */}
-
-                {
-                    (hasInput & showResult) ?
-                    (   
-                        <div
-                            style={{justifyContent : 'center'}}
-                        >
-                            <div class="text-display">
-                                {input}
-                            </div>
-                            <div class="result">
-                                <p>English Translation: {translation}</p>
-                                <h4>Full data(check console)</h4>
-                                <p>{JSON.stringify(data, null, 2)}</p>
-                            </div>
-                            
-                        </div>
-                    )
-                    :
-                    (
-                        <div
-                        style={{alignItems : 'center'}}>
-                            <div class="instruction">
-                                Spanish Sentence Analyzer
-                                <p/>
-                                Enter a {lang} text to analyze!
-                                
-                            </div>
-
-<<<<<<< HEAD
-                            <div class="text-box-container">
-                                <form onSubmit={handleSubmit}>
-                                    <textarea className="text-box"
-                                        type="text"
-                                        value={input}
-                                        onChange={handleInputChange}
-                                        placeholder="Enter a message"
-                                    ></textarea>
-                                    <button
-                                        type="submit"
-                                        style={{
-                                            backgroundColor : hasInput
-                                                ? 'rgb(239, 185, 79)'
-                                                : 'rgb(244, 215, 157)',
-                                        }}
-                                    >Analyze</button>
-                                </form>
-                            </div>
-                        </div>
-                    )
-
+                {wrongLang && (['es', 'fr', 'zh'].includes(actualLang)
+                    ? (<Alert severity="warning">Wrong language detected. Did you mean <a
+                        href={`/language/${actualLang}`}>{map[actualLang]}</a>?</Alert>)
+                    : (<Alert severity="warning">Wrong language detected.</Alert>))
                 }
-                
-=======
-                <h4>Full data(check console)</h4>
-                {/*<p>{JSON.stringify(data, null, 2)}</p>*/}
->>>>>>> d36d82c312cc378ba43fbb8d9161fb81f4ede7c0
+                {hasInput && showResult ? (
+                    <div className="centered-container">
+                        <div className="text-display">{input}</div>
+                        <div className="result centered-container">
+                            <p>English Translation: {translation}</p>
+                            <SentenceWrapper data={data} lang={lang}/>
+                            {/*<h4>Full data(check console)</h4>*/}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="centered-container">
+                        <div className="instruction">
+                            {map[lang]} Sentence Analyzer
+                            <p/>
+                            Enter a {lang} text to analyze!
+                        </div>
 
-                <div className="menu">
+                        <div className="text-box-container">
+                            <form onSubmit={handleSubmit}>
+
+                                <textarea
+                                    className="text-box"
+                                    type="text"
+                                    value={input}
+                                    onChange={handleInputChange}
+                                    placeholder="Enter a message"
+                                    onKeyUp={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleSubmit(e);
+                                        }
+                                    }}
+                                ></textarea>
+                                <button
+                                    type="submit"
+                                    style={{
+                                        backgroundColor: hasInput
+                                            ? 'rgb(239, 185, 79)'
+                                            : 'rgb(244, 215, 157)',
+                                    }}
+                                >
+                                    Analyze
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                {/*<h4>Full data(check console)</h4>*/}
+
+                <div className="menu" style={{marginTop: '60px'}}>
                     <button onClick={() => navigate('/')}>Home</button>
                 </div>
             </div>
         </div>
-    )
+    );
 }
