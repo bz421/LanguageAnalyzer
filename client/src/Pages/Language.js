@@ -2,7 +2,9 @@ import React, {useState, useEffect} from 'react'
 import {useNavigate, useParams} from 'react-router-dom';
 import './styles.css'
 
+import Sidebar from '../Components/Sidebar'
 import SentenceWrapper from '../Components/SentenceWrapper'
+import Alert from '@mui/material/Alert'
 
 export default function Page() {
     const [msg, setMsg] = useState('')
@@ -22,6 +24,8 @@ export default function Page() {
     // const [beiConstructions, setBeiConstructions] = useState([])
     // const [particles, setParticles] = useState([])
 
+    const [wrongLang, setWrongLang] = useState(false)
+    const [actualLang, setActualLang] = useState('')
     const {lang} = useParams()
 
     const navigate = useNavigate()
@@ -47,8 +51,11 @@ export default function Page() {
             })
         })
         const data = await response.json()
-        console.log(data.result)
+        if (data.language === 'zh-CN' || data.language === 'zh-TW') data.language = 'zh'
+        console.log(data)
         setTranslation(data.result)
+        setActualLang(data.language)
+        setWrongLang(data.language !== lang)
     }
 
     const getData = async (trimmedInput) => {
@@ -82,12 +89,19 @@ export default function Page() {
         getMessage()
     }, [])
 
+    const map = {'es': 'Spanish', 'fr': 'French', 'zh': 'Chinese'}
     return (
         <div>
-            <p>{msg}</p>
+            <Sidebar />
+            {/*<p>{msg}</p>*/}
             <div className="page">
                 <div className="instruction">
                     Enter a {lang} text to analyze!
+                    {wrongLang && ['es', 'fr', 'zh'].includes(actualLang) ? (
+                        <Alert sx={{marginTop: '10px'}} severity="warning">Wrong language detected. Did you mean to check out our <a href={`/language/${actualLang}`}>{map[actualLang]}</a> tool?</Alert>
+                    ) : (
+                        <></>
+                    )}
                 </div>
                 <form onSubmit={handleSubmit}>
                     <input className="text-box"
