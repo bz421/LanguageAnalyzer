@@ -3,10 +3,15 @@
     "web-vitals": "^4.2.4"
   },
   "dependencies": {
-    "@mui/material": "^6.3.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.0",
+    "@mui/material": "^6.4.0",
+    "@mui/styled-engine-sc": "^6.4.0",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "d3": "^7.9.0",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "styled-components": "^6.1.14"
   }
 }

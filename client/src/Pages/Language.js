@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 import './styles.css';
+// import ClearIcon from '@mui/icons-material/Clear';
+
 
 import Sidebar from '../Components/Sidebar';
 import SentenceWrapper from '../Components/SentenceWrapper';
@@ -84,6 +86,12 @@ export default function Page() {
         }
     };
 
+    const clearInput = (e) => {
+        setInput(null);
+        setHasInput(false);
+        setShowResult(false);
+    };
+
     useEffect(() => {
         getMessage();
     }, []);
@@ -100,7 +108,11 @@ export default function Page() {
                 }
                 {hasInput && showResult ? (
                     <div className="centered-container">
-                        <div className="text-display">{input}</div>
+                        <div className="text-display">{input}
+                            <button className="close" onClick={clearInput}>
+                                X
+                            </button>
+                        </div>
                         <div className="result centered-container">
                             <p>English Translation: {translation}</p>
                             <SentenceWrapper data={data} lang={lang}/>
@@ -112,7 +124,7 @@ export default function Page() {
                         <div className="instruction">
                             {map[lang]} Sentence Analyzer
                             <p/>
-                            Enter a {lang} text to analyze!
+                            Enter a {map[lang]} text to analyze!
                         </div>
 
                         <div className="text-box-container">
