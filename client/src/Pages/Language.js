@@ -131,16 +131,17 @@ export default function Page() {
                                         }
                                     }}
                                 ></textarea>
-                                <button
-                                    type="submit"
-                                    style={{
-                                        backgroundColor: hasInput
-                                            ? 'rgb(239, 185, 79)'
-                                            : 'rgb(244, 215, 157)',
-                                    }}
-                                >
-                                    Analyze
-                                </button>
+                                    <button
+                                        type="submit"
+                                        disabled={!hasInput}
+                                        style={{
+                                            backgroundColor: hasInput
+                                                ? 'rgb(239, 185, 79)'
+                                                : 'rgb(244, 215, 157)',
+                                        }}
+                                    >
+                                        Analyze
+                                    </button>
                             </form>
                         </div>
                     </div>
