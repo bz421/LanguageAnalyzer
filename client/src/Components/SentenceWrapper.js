@@ -404,7 +404,7 @@ export default function SentenceWrapper({data, lang}) {
 
     return (
         <>
-            <Grid2 container spacing={2} justifyContent="space-evenly" flexWrap="wrap">
+            <Grid2 container spacing={2} >
                 {data.tokens.map((token, index) => (
                     <Grid2 item key={index}>
                         {<Box

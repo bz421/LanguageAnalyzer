@@ -42,7 +42,6 @@ def getSubjectPhrase(d):
                     subjectPhrases.append((span.text, span.start, span.end))
     return {'subjects': subjectPhrases}
 
-    return {'subjects': subjectPhrases}
 
 def getVerb(d):
     verbPhrases = []

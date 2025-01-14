@@ -2,25 +2,25 @@ import {Navigate, useNavigate} from "react-router-dom"
 import china from '../Images/china.png';
 import france from '../Images/france.png';
 import spain from '../Images/spain.png';
+import '../Pages/styles.css';
 
 export default function Sidebar() {
-
     const navigate = useNavigate()
 
     return (
-        <div class="sidebar">
-            <button onClick={() => navigate('/language/es')}>
-                <img src={spain} style={{'width': '50px', 'height': '50px'}}/>
+        <div className="sidebar">
+            <button className="flag-button" onClick={() => navigate('/language/es')}>
+                <img className="flag-icon" src={spain} />
                 Spanish
             </button>
 
-            <button onClick={() => navigate('/language/fr')}>
-                <img src={france} style={{'width': '50px', 'height': '50px'}}/>
+            <button className="flag-button" onClick={() => navigate('/language/fr')}>
+                <img className="flag-icon" src={france} />
                 French
             </button>
 
-            <button onClick={() => navigate('/language/zh')}>
-                <img src={china} style={{'width': '50px', 'height': '50px'}}/>
+            <button className="flag-button" onClick={() => navigate('/language/zh')}>
+                <img className="flag-icon" src={china} />
                 Mandarin
             </button>
         </div>

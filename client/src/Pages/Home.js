@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import {useNavigate} from 'react-router-dom';
 import './styles.css'
-import Navbar from "./Navbar";
-import Sidebar from "./Sidebar";
+import Navbar from "../Components/Navbar";
+import Sidebar from "../Components/Sidebar";
 
 export default function Home() {
     const [msg, setMsg] = useState('')
@@ -24,13 +24,13 @@ export default function Home() {
     }, [])
     return (
         <div>
-            <Navbar/>
+            {/*<Navbar/>*/}
             <div class="menu">
                 <button onClick={() => navigate('/language/es/')}>Spanish</button>
                 <button onClick={() => navigate('/language/fr')}>French</button>
                 <button onClick={() => navigate('/language/zh')}>Mandarin</button>
             </div>
-            <Sidebar/>
+            {/*<Sidebar/>*/}
         </div>
     )
 }
