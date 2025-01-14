@@ -88,6 +88,12 @@ export default function Page() {
         }
     };
 
+    const clearInput = (e) => {
+        setInput(null);
+        setHasInput(false);
+        setShowResult(false);
+    };
+
     useEffect(() => {
         getMessage();
     }, []);
@@ -105,10 +111,15 @@ export default function Page() {
                 }
                 {hasInput && showResult ? (
                     <div className="centered-container">
-                        <div className="text-display">{input}</div>
+                        <div className="text-display">{input}
+                            <button className="close" onClick={clearInput}>
+                                X
+                            </button>
+                        </div>
                         <div className="result centered-container">
                             <p><b>Translation: {translation}</b></p>
                             <SentenceWrapper data={data} lang={lang}/>
+                            {/*<h4>Full data(check console)</h4>*/}
                         </div>
                     </div>
                 ) : (
@@ -121,6 +132,7 @@ export default function Page() {
 
                         <div className="text-box-container">
                             <form onSubmit={handleSubmit}>
+
                                 <textarea
                                     className="text-box"
                                     type="text"
@@ -155,6 +167,8 @@ export default function Page() {
                         </div>
                     </div>
                 )}
+
+                {/*<h4>Full data(check console)</h4>*/}
 
                 <div className="menu" style={{marginTop: '60px'}}>
                     <button onClick={() => navigate('/')}>Home</button>

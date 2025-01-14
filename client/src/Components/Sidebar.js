@@ -6,29 +6,23 @@ import '../Pages/styles.css';
 
 export default function Sidebar() {
     const navigate = useNavigate()
-
+    const reload = (path) => {
+        navigate(path);
+        window.location.reload();
+    }
     return (
         <div className="sidebar">
-            <button className="flag-button" onClick={() => {
-                navigate('/language/es')
-                window.location.reload()
-            }}>
+            <button className="flag-button" onClick={() => reload('/language/es')}>
                 <img className="flag-icon" src={spain} />
                 Spanish
             </button>
 
-            <button className="flag-button" onClick={() => {
-                navigate('/language/fr')
-                window.location.reload()
-            }}>
+            <button className="flag-button" onClick={() => reload('/language/fr')}>
                 <img className="flag-icon" src={france} />
                 French
             </button>
 
-            <button className="flag-button" onClick={() => {
-                navigate('/language/zh')
-                window.location.reload()
-            }}>
+            <button className="flag-button" onClick={() => reload('/language/zh')}>
                 <img className="flag-icon" src={china} />
                 Mandarin
             </button>
