@@ -9,17 +9,26 @@ export default function Sidebar() {
 
     return (
         <div className="sidebar">
-            <button className="flag-button" onClick={() => navigate('/language/es')}>
+            <button className="flag-button" onClick={() => {
+                navigate('/language/es')
+                window.location.reload()
+            }}>
                 <img className="flag-icon" src={spain} />
                 Spanish
             </button>
 
-            <button className="flag-button" onClick={() => navigate('/language/fr')}>
+            <button className="flag-button" onClick={() => {
+                navigate('/language/fr')
+                window.location.reload()
+            }}>
                 <img className="flag-icon" src={france} />
                 French
             </button>
 
-            <button className="flag-button" onClick={() => navigate('/language/zh')}>
+            <button className="flag-button" onClick={() => {
+                navigate('/language/zh')
+                window.location.reload()
+            }}>
                 <img className="flag-icon" src={china} />
                 Mandarin
             </button>
