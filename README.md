@@ -13,6 +13,9 @@ A sentence analyzer application for language-learning that will break up an inpu
     - Flask
     - Waitress(optional: for optimized Flask server)
     - spaCy
+       - `es_dep_news_trf` for Spanish model
+       - `fr_dep_news_trf` for French model
+       - `zh_core_web_trf` for Chinese model
     - requests
     - deep_translator
     - pypinyin
