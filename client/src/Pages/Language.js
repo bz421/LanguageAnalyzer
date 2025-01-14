@@ -109,7 +109,7 @@ export default function Page() {
                 )}
 
                 <h4>Full data(check console)</h4>
-                <p>{JSON.stringify(data, null, 2)}</p>
+                {/*<p>{JSON.stringify(data, null, 2)}</p>*/}
 
                 <div className="menu">
                     <button onClick={() => navigate('/')}>Home</button>
