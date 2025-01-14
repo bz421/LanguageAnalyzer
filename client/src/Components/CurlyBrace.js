@@ -66,23 +66,21 @@ export default function CurlyBrace({curlyBraces, widthSVG, heightSVG, onHover, o
                 .attr('y', Math.max(y1, y2) + 40)
                 .attr('text-anchor', 'middle')
                 .style('font-size', '15px')
-                .style('fill', '#000')
+                .style('fill', hoveredIndex === index ? '#f00' : '#000')
+                .style('font-weight', hoveredIndex === index ? 'bold' : 'normal')
                 .text(annotation);
         });
     }
 
     useEffect(() => {
-        // console.log('Render curly braces')
-        renderCurlyBraces()
-    }, [curlyBraces, hoveredIndex, clickedIndex]);
-
+        renderCurlyBraces();
+    }, [curlyBraces, hoveredIndex, clickedIndex, renderCurlyBraces]);
     return (
         <svg
             overflow='visible'
             ref={svgRef}
-            height={heightSVG} // Increase the height
-            width={widthSVG} // Increase the width
-            // viewBox={`0 0 ${widthSVG} ${heightSVG}`}
+            height={heightSVG}
+            width={widthSVG}
         ></svg>
     );
 }
