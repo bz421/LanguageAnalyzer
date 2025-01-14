@@ -3,8 +3,10 @@
     "web-vitals": "^4.2.4"
   },
   "dependencies": {
+    "@mui/material": "^6.3.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
+    "d3": "^7.9.0",
     "express": "^4.21.2"
   }
 }

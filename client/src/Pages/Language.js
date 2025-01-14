@@ -2,12 +2,13 @@ import React, {useState, useEffect} from 'react'
 import {useNavigate, useParams} from 'react-router-dom';
 import './styles.css'
 
-import SentenceWrapper from '../Components/SentenceWrapper'
-
 export default function Page() {
     const [msg, setMsg] = useState('')
     const [translation, setTranslation] = useState('')
     const [input, setInput] = useState('')
+    const [hasInput, setHasInput] = useState(false)
+    const [showResult, setShowResult] = useState(false);
+
 
     // const [subjs, setSubjs] = useState([])
     // const [verbs, setVerbs] = useState([])
@@ -34,6 +35,8 @@ export default function Page() {
 
         getTranslation(trimmedInput)
         getData(trimmedInput)
+
+        setShowResult(true);
     }
 
     const getTranslation = async (trimmedInput) => {
@@ -77,6 +80,17 @@ export default function Page() {
         )
     }
 
+    const handleInputChange = (e) => {
+        const value = e.target.value
+        setInput(value)
+        if(value.trim().length == 0) {
+            setHasInput(false)
+            setShowResult(false)
+        } else {
+            setHasInput(true)
+        }
+        
+    }
 
     useEffect(() => {
         getMessage()
@@ -86,30 +100,61 @@ export default function Page() {
         <div>
             <p>{msg}</p>
             <div className="page">
-                <div className="instruction">
-                    Enter a {lang} text to analyze!
-                </div>
-                <form onSubmit={handleSubmit}>
-                    <input className="text-box"
-                           type="text"
-                           value={input}
-                           onChange={(e) => setInput((e.target.value))}
-                           placeholder="Enter a message"
-                    />
-                    <button type="submit">Analyze</button>
-                </form>
-                <p>English Translation: {translation}</p>
-                <p>Detected Language: {lang}</p>
+                
+                
+                {/* <p>Detected Language: {lang}</p> */}
 
-                {data && Object.keys(data).length > 0 && (
-                    <div style={{textAlign: 'center'}}>
-                        <h1>Wrapper</h1>
-                        <SentenceWrapper data={data} lang={lang}></SentenceWrapper>
-                    </div>
-                )}
+                {
+                    (hasInput & showResult) ?
+                    (   
+                        <div
+                            style={{justifyContent : 'center'}}
+                        >
+                            <div class="text-display">
+                                {input}
+                            </div>
+                            <div class="result">
+                                <p>English Translation: {translation}</p>
+                                <h4>Full data(check console)</h4>
+                                <p>{JSON.stringify(data, null, 2)}</p>
+                            </div>
+                            
+                        </div>
+                    )
+                    :
+                    (
+                        <div
+                        style={{alignItems : 'center'}}>
+                            <div class="instruction">
+                                Spanish Sentence Analyzer
+                                <p/>
+                                Enter a {lang} text to analyze!
+                                
+                            </div>
 
-                <h4>Full data(check console)</h4>
-                <p>{JSON.stringify(data, null, 2)}</p>
+                            <div class="text-box-container">
+                                <form onSubmit={handleSubmit}>
+                                    <textarea className="text-box"
+                                        type="text"
+                                        value={input}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter a message"
+                                    ></textarea>
+                                    <button
+                                        type="submit"
+                                        style={{
+                                            backgroundColor : hasInput
+                                                ? 'rgb(239, 185, 79)'
+                                                : 'rgb(244, 215, 157)',
+                                        }}
+                                    >Analyze</button>
+                                </form>
+                            </div>
+                        </div>
+                    )
+
+                }
+                
 
                 <div className="menu">
                     <button onClick={() => navigate('/')}>Home</button>
