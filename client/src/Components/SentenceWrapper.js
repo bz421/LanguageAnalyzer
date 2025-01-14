@@ -255,7 +255,7 @@ export default function SentenceWrapper({data, lang}) {
             setPopupInfo({
                 title: token.text,
                 sentence: objectStmnt,
-                description: `<b style="color: red;">${token.text}</b> is a conjugated verb in this sentence.`,
+                description: `<b style="color: red;">${token.text}</b> is a verb in this sentence.`,
                 details: objectDescriptions,
                 end: lang === 'es' ? `See more on <a target="_blank" href="https://www.spanishdict.com/conjugate/${token.text}">SpanishDict</a>` : lang === 'fr' ? `See more on <a href="https://wordreference.com/conj/frverbs.aspx?v=${token.text}">WordReference</a>` : null
             });
