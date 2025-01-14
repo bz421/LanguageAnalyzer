@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, {useRef, useEffect, useState} from 'react';
+import {Box} from '@mui/material';
 import * as d3 from 'd3';
 
-export default function CurlyBrace({ curlyBraces, widthSVG, heightSVG, onHover, onClick }) {
+export default function CurlyBrace({curlyBraces, widthSVG, heightSVG, onHover, onClick}) {
     const svgRef = useRef(null);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [clickedIndex, setClickedIndex] = useState(null);
@@ -38,7 +39,7 @@ export default function CurlyBrace({ curlyBraces, widthSVG, heightSVG, onHover, 
         const svg = d3.select(svgRef.current);
         svg.selectAll('*').remove();
 
-        curlyBraces.forEach(({ x1, y1, x2, y2, width, q, annotation }, index) => {
+        curlyBraces.forEach(({x1, y1, x2, y2, width, q, annotation}, index) => {
             svg
                 .append('path')
                 .attr('d', makeCurlyBrace(x1, y1, x2, y2, width, q))
@@ -71,8 +72,17 @@ export default function CurlyBrace({ curlyBraces, widthSVG, heightSVG, onHover, 
     }
 
     useEffect(() => {
-        renderCurlyBraces();
+        // console.log('Render curly braces')
+        renderCurlyBraces()
     }, [curlyBraces, hoveredIndex, clickedIndex]);
 
-    return <svg ref={svgRef} height={heightSVG} width={widthSVG}></svg>;
+    return (
+        <svg
+            overflow='visible'
+            ref={svgRef}
+            height={heightSVG} // Increase the height
+            width={widthSVG} // Increase the width
+            // viewBox={`0 0 ${widthSVG} ${heightSVG}`}
+        ></svg>
+    );
 }

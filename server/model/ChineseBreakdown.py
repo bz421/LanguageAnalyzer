@@ -177,7 +177,7 @@ def getData():
     out = {'sentence': data['q'], 'tokens': []}
     for token in tokenized:
         out['tokens'].append(
-            {'text': token, 'pinyin': '', 'tags': [], 'baSubjects': [], 'beiSubjects': [], 'baObjects': [], 'beiObjects': [], 'chengyuIndex': None}
+            {'text': token, 'pinyin': '', 'tags': [], 'baSubjects': [], 'beiSubjects': [], 'baObjects': [], 'beiObjects': [], 'baVerbs': [], 'beiVerbs': [], 'chengyuIndex': None}
         )
 
     pinyinI = 0
@@ -211,6 +211,9 @@ def getData():
     for entry in baConstructions['baConstructions']:
         for i in range(entry['ba'][0], entry['ba'][1]):
             out['tokens'][i]['tags'].append('baParticle')
+            out['tokens'][i]['baVerbs'].append((entry['verb'][1], entry['verb'][2]))
+            out['tokens'][i]['baSubjects'].append((entry['subject'][1], entry['subject'][2]))
+            out['tokens'][i]['baObjects'].append((entry['object'][1], entry['object'][2]))
         for i in range(entry['verb'][1], entry['verb'][2]):
             out['tokens'][i]['tags'].append('baVerb')
             out['tokens'][i]['baSubjects'].append((entry['subject'][1], entry['subject'][2]))
@@ -223,6 +226,9 @@ def getData():
     for entry in beiConstructions['beiConstructions']:
         for i in range(entry['bei'][0], entry['bei'][1]):
             out['tokens'][i]['tags'].append('beiParticle')
+            out['tokens'][i]['beiVerbs'].append((entry['verb'][1], entry['verb'][2]))
+            out['tokens'][i]['beiSubjects'].append((entry['subject'][1], entry['subject'][2]))
+            out['tokens'][i]['beiObjects'].append((entry['object'][1], entry['object'][2]))
         for i in range(entry['verb'][1], entry['verb'][2]):
             out['tokens'][i]['tags'].append('beiVerb')
             out['tokens'][i]['beiSubjects'].append((entry['subject'][1], entry['subject'][2]))
@@ -231,6 +237,18 @@ def getData():
             out['tokens'][i]['tags'].append('beiSubject')
         for i in range(entry['object'][1], entry['object'][2]):
             out['tokens'][i]['tags'].append('beiObject')
+
+    # for entry in beiConstructions['beiConstructions']:
+    #     for i in range(entry['bei'][0], entry['bei'][1]):
+    #         out['tokens'][i]['tags'].append('beiParticle')
+    #     for i in range(entry['verb'][1], entry['verb'][2]):
+    #         out['tokens'][i]['tags'].append('beiVerb')
+    #         out['tokens'][i]['beiSubjects'].append((entry['subject'][1], entry['subject'][2]))
+    #         out['tokens'][i]['beiObjects'].append((entry['object'][1], entry['object'][2]))
+    #     for i in range(entry['subject'][1], entry['subject'][2]):
+    #         out['tokens'][i]['tags'].append('beiSubject')
+    #     for i in range(entry['object'][1], entry['object'][2]):
+    #         out['tokens'][i]['tags'].append('beiObject')
 
     return out, 200
 
