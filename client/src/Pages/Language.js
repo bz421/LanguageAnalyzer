@@ -78,16 +78,19 @@ export default function Page() {
         const response = await fetch(`/api/${lang}/checkGrammar`, {
             method: 'POST',
             headers: {
-                'Content-type': 'application/json'
+                'Content-type': 'application/json',
             },
             body: JSON.stringify({
-                'q': trimmedInput
-            })
-        })
+                q: trimmedInput,
+            }),
+        });
         const data = await response.json();
-        console.log('Fixed sentence: ' + JSON.stringify(data.corrected, null, 2))
-        setCorrection(data.corrected)
-    }
+        console.log('Final data: ' + JSON.stringify(data, null, 2));
+        setData(data);
+    };
+
+
+    
 
     const getMessage = async () => {
         await fetch(`/api/hello`)
