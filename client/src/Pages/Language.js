@@ -86,7 +86,10 @@ export default function Page() {
         });
         const data = await response.json();
         console.log('Final data: ' + JSON.stringify(data, null, 2));
-        setData(data);
+        if (data.corrected !== trimmedInput) {
+            setCorrection(data.corrected);
+        }
+        console.log(correction)
     };
 
 
