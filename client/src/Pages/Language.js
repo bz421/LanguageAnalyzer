@@ -15,6 +15,9 @@ export default function Page() {
     const [hasInput, setHasInput] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [data, setData] = useState([]);
+    const [correction, setCorrection] = useState('')
+
+
     const [loading, setLoading] = useState(false); // Add loading state
     const [wrongLang, setWrongLang] = useState(false);
     const [actualLang, setActualLang] = useState('');
@@ -35,6 +38,7 @@ export default function Page() {
 
         setShowResult(true);
         setLoading(false); // Set loading to false once data is fetched
+        checkGrammar(trimmedInput)
     };
 
     const getTranslation = async (trimmedInput) => {
@@ -69,6 +73,21 @@ export default function Page() {
         console.log('Final data: ' + JSON.stringify(data, null, 2));
         setData(data);
     };
+
+    const checkGrammar = async (trimmedInput) => {
+        const response = await fetch(`/api/${lang}/checkGrammar`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': trimmedInput
+            })
+        })
+        const data = await response.json();
+        console.log('Fixed sentence: ' + JSON.stringify(data.corrected, null, 2))
+        setCorrection(data.corrected)
+    }
 
     const getMessage = async () => {
         await fetch(`/api/hello`)
@@ -122,6 +141,12 @@ export default function Page() {
                             </IconButton>
 
                         </div>
+                        {correction && correction.length > 0 && (
+                            <div style={{textAlign: 'center'}}>
+                                <h1>Perhaps you meant this?</h1>
+                                <p>{correction}</p>
+                            </div>
+                        )}
                         <div className="result centered-container">
                             <p><b>Translation: {translation}</b></p>
                             <SentenceWrapper data={data} lang={lang}/>

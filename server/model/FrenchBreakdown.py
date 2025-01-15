@@ -9,7 +9,8 @@ translator = GoogleTranslator(source='fr', target='en')
 
 from spacy.matcher import Matcher
 nlpFR = spacy.load('fr_dep_news_trf')
-
+import language_tool_python
+tool = language_tool_python.LanguageTool('fr')
 """
 Check language.js for info on the return types of the functions below
 """
@@ -278,6 +279,20 @@ def frenchData():
 
     # print('out', json.dumps(out, indent=4))
     return out, 200
+
+
+@FrenchBreakdown.route('/api/fr/checkGrammar', methods=['POST'])
+def checkFRGrammar():
+    data = request.get_json()
+    if not data or 'q' not in data:
+        return {'error': 'No query provided'}, 400
+    
+    correctText = tool.correct(data['q'])
+
+    if(correctText == data['q']):
+        return {'corrected': None}, 200
+    else:
+        return {'corrected': correctText}, 200
 
 print('Ready French')
 # J'irai à l'université dans 3 ans.
