@@ -131,12 +131,15 @@ form>button:hover{
     text-align: center;
 }
 
-.close {
+.clear-button {
     display: flex;
     justify-self: end;
     border: none;
     background-color: transparent;
     margin-left: auto;
+
+    width: 25px;
+    height: 25px;
 }
 
 .centered-container {
@@ -193,6 +196,7 @@ form>button:hover{
     margin-bottom: 10px;
 }
 
+<<<<<<< HEAD
 .sample {
     display: flex;
     flex-direction: column;
@@ -217,6 +221,25 @@ form>button:hover{
     font-weight: 500;
 }
 
+=======
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+>>>>>>> 59a5925777ea9747f4e989b46e37526091edf659
 @media (max-width: 960px) {
     .sidebar {
         flex-direction: row;
