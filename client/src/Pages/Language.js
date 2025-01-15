@@ -233,11 +233,11 @@ export default function Page() {
                             ) : (
                                 <div className="sample">
                                 <h3>Or you can try one of these:</h3>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>你好，你好吗？</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>她的手机被小偷偷走了。</p>
                                 <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我的姐姐很马马虎虎，经常丢三落四。</p>
                                 <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我们更喜欢喝茶。</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>或許他會在英文課上閱讀。</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我們今天可以在我家見面，一起吃點心。</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我把作业都做完了。</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我们今天可以在我家见面，一起吃点心。</p>
 
                                 </div> 
                             )
