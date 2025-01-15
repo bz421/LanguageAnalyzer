@@ -11,6 +11,44 @@ from spacy.matcher import Matcher
 nlpFR = spacy.load('fr_dep_news_trf')
 import language_tool_python
 tool = language_tool_python.LanguageTool('fr')
+
+frmed = spacy.load('fr_core_news_md')
+from nltk.corpus import wordnet as wn
+def get_synonyms(word):
+    synonyms = set()
+    for syn in wn.synsets(word, lang='fra'):
+        # print(syn)
+        for lemma in syn.lemmas(lang='fra'):
+            synonyms.add(lemma.name())
+    return list(synonyms)
+
+def find_contextual_synonyms(sentence, target_word, n=5):
+    doc = frmed(sentence)
+    target_token = None
+    
+    for token in doc:
+        if token.text.lower() == target_word.lower():
+            target_token = token
+            break
+    
+    if not target_token:
+        return f"'{target_word}' not found in the sentence."
+    
+    synonyms = get_synonyms(target_word)
+    # print(synonyms)
+    contextual_synonyms = []
+    for synonym in synonyms:
+        synonym_doc = frmed(synonym)
+        # print(synonym_doc.vector_norm)
+        if synonym_doc.vector_norm:
+            similarity = target_token.similarity(synonym_doc)
+            contextual_synonyms.append((synonym, similarity))
+    
+    contextual_synonyms = sorted(contextual_synonyms, key=lambda x: x[1], reverse=True)[:5]
+    return [tup[0] for tup in contextual_synonyms]
+
+
+
 """
 Check language.js for info on the return types of the functions below
 """
@@ -293,6 +331,34 @@ def checkFRGrammar():
         return {'corrected': None}, 200
     else:
         return {'corrected': correctText}, 200
+    
+
+@FrenchBreakdown.route('/api/fr/getSyn', methods=['POST'])
+def getFRSyn():
+    data = request.get_json()
+    if not data or 'q' not in data:
+        return {'error': 'No query provided'}, 400
+    
+    sentence = data['q']
+    nlpSentence = frmed(sentence)
+
+    adjObject = {}
+    for word in nlpSentence:
+        if(word.pos_ == 'ADJ'):
+            target_word = word.text
+            syns = find_contextual_synonyms(sentence, target_word)
+            adjObject[target_word] = syns
+
+    emptySyn = []
+    for k, v in adjObject.items():
+        if(len(v) == 0):
+            emptySyn.append(k)
+
+    for k in list(adjObject.keys()):
+        if(k in emptySyn):
+            del adjObject[k]
+
+    return adjObject, 200
 
 print('Ready French')
 # J'irai à l'université dans 3 ans.

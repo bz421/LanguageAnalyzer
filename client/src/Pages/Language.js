@@ -16,6 +16,7 @@ export default function Page() {
     const [showResult, setShowResult] = useState(false);
     const [data, setData] = useState([]);
     const [correction, setCorrection] = useState('')
+    const [syns, setSyns] = useState('')
 
 
     const [loading, setLoading] = useState(false); // Add loading state
@@ -39,6 +40,7 @@ export default function Page() {
         setShowResult(true);
         setLoading(false); // Set loading to false once data is fetched
         checkGrammar(trimmedInput)
+        getSyn(trimmedInput)
     };
 
     const getTranslation = async (trimmedInput) => {
@@ -86,7 +88,25 @@ export default function Page() {
         });
         const data = await response.json();
         console.log('Final data: ' + JSON.stringify(data, null, 2));
-        setData(data);
+        if (data.corrected !== trimmedInput) {
+            setCorrection(data.corrected);
+        }
+        console.log(correction)
+    };
+
+    const getSyn = async(trimmedInput) => {
+        const response = await fetch(`/api/${lang}/getSyn`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json',
+            },
+            body: JSON.stringify({
+                q: trimmedInput,
+            }),
+        });
+        const syns = await response.json();
+        console.log('Synonyms: ' + JSON.stringify(syns, null, 2));
+        setSyns(syns);
     };
 
 
@@ -155,6 +175,12 @@ export default function Page() {
                             <SentenceWrapper data={data} lang={lang}/>
                             {/*<h4>Full data(check console)</h4>*/}
                         </div>
+
+                        {/* {syns && Object.keys(syns).length > 0 && (
+                            Object.keys(syns).map(adj => 
+                                <p>{adj}: {syns[adj][0]}</p>
+                            )
+                        )} */}
                     </div>
                 ) : (
                     <div className="centered-container">
