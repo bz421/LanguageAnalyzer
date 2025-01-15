@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {Box, Grid2, Modal, Tooltip} from '@mui/material';
+import {Box, Grid2, Modal, Tooltip, Button} from '@mui/material';
 import CurlyBrace from './CurlyBrace';
 
 // import {ArcherContainer, ArcherElement} from 'react-archer'
@@ -225,6 +225,7 @@ export default function SentenceWrapper({data, lang}) {
                 end: lang === 'es' ? `See more on <a target="_blank" href="https://www.spanishdict.com/conjugate/${token.text}">SpanishDict</a>` : lang === 'fr' ? `See more on <a href="https://wordreference.com/conj/frverbs.aspx?v=${token.text}">WordReference</a>` : null
             });
         } else if (token.tags.includes('verb') && lang !== 'zh') {
+            console.log(token, token.info[0][0][0])
             const form = token.info[0][0][0] === "Fin" ? "finite" : "infinitive";
             const mood = token.info[0][1][0] === "Ind" ? 'indicative' : token.info[0][1][0] === 'Sub' ? 'subjunctive' : token.info[0][1][0] === 'Imp' ? 'imperative' : token.info[0][1][0] === 'Cnd' ? 'conditional' : 'N/A';
             const tense = token.info[0][2][0] === "Pres" ? 'present' : token.info[0][2][0] === 'Past' ? 'past' : token.info[0][2][0] === 'Imp' ? 'imperfect' : token.info[0][2][0] === 'Fut' ? 'future' : token.info[0][2][0] === 'Cnd' ? 'conditional' : 'N/A';
@@ -251,12 +252,14 @@ export default function SentenceWrapper({data, lang}) {
 
             token.details = `Form: ${form}, Mood: ${mood}, Tense: ${tense}, Person: ${person}, Number: ${number}`;
 
+            console.log(token.details)
             const objectDescriptions = objects.map(obj => `<b style="color: blue;">${obj}</b> is an object of <b style="color: red;">${token.text}</b> in this sentence`).join('<br/>');
             setPopupInfo({
                 title: token.text,
                 sentence: objectStmnt,
                 description: `<b style="color: red;">${token.text}</b> is a verb in this sentence.`,
-                details: objectDescriptions,
+                details: token.details,
+                objects: objectDescriptions,
                 end: lang === 'es' ? `See more on <a target="_blank" href="https://www.spanishdict.com/conjugate/${token.text}">SpanishDict</a>` : lang === 'fr' ? `See more on <a href="https://wordreference.com/conj/frverbs.aspx?v=${token.text}">WordReference</a>` : null
             });
         }
@@ -404,7 +407,7 @@ export default function SentenceWrapper({data, lang}) {
 
     return (
         <>
-            <Grid2 container spacing={2} >
+            <Grid2 container spacing={2}>
                 {data.tokens.map((token, index) => (
                     <Grid2 item key={index}>
                         {<Box
@@ -528,7 +531,7 @@ export default function SentenceWrapper({data, lang}) {
                     <p dangerouslySetInnerHTML={{__html: popupInfo?.details.replace(/, /g, '<br/>')}}></p>
                     <p dangerouslySetInnerHTML={{__html: popupInfo?.objects}}></p>
                     {popupInfo?.end && <p dangerouslySetInnerHTML={{__html: popupInfo?.end}}></p>}
-                    <button onClick={handleClosePopup}>Close</button>
+                    <Button variant="text" color="primary" onClick={handleClosePopup}>Close</Button>
                 </Box>
             </Modal>
         </>
