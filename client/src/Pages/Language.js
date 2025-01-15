@@ -181,30 +181,30 @@ export default function Page() {
                         (
                             <div className="sample">
                                 <h3>Or you can try one of these:</h3>
-                                <p onClick={handleSampleClick}>Hola, ¿cómo estás?</p>
-                                <p onClick={handleSampleClick}>A mí me gusta nadar en la piscina con mi hermana</p>
-                                <p onClick={handleSampleClick}>Nosotros preferimos el café al té.</p>
-                                <p onClick={handleSampleClick}>A lo mejor, leerá en su clase de inglés.</p>
-                                <p onClick={handleSampleClick}>Podemos quedar en mi casa para tomar una merienda hoy.</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Hola, ¿cómo estás?</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>A mí me gusta nadar en la piscina con mi hermana</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nosotros preferimos el café al té.</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>A lo mejor, leerá en su clase de inglés.</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Podemos quedar en mi casa para tomar una merienda hoy.</p>
                             </div>
                         ) : (
                             (lang === 'fr') ?
                             (<div className="sample">
                                 <h3>Or you can try one of these:</h3>
-                                <p onClick={handleSampleClick}>Bonjour, comment ça va?</p>
-                                <p onClick={handleSampleClick}>J'aime nager dans la piscine avec ma sœur.</p>
-                                <p onClick={handleSampleClick}>Nous préférons le café au thé.</p>
-                                <p onClick={handleSampleClick}>Peut-être qu'il lira dans son cours d'anglais.</p>
-                                <p onClick={handleSampleClick}>Nous pouvons nous retrouver chez moi pour un goûter aujourd'hui.</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Bonjour, comment ça va?</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>J'aime nager dans la piscine avec ma sœur.</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nous préférons le café au thé.</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Peut-être qu'il lira dans son cours d'anglais.</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nous pouvons nous retrouver chez moi pour un goûter aujourd'hui.</p>
                             </div>
                             ) : (
                                 <div className="sample">
                                 <h3>Or you can try one of these:</h3>
-                                <p onClick={handleSampleClick}>你好，你好嗎？</p>
-                                <p onClick={handleSampleClick}>wǒ xǐ huān hé jiě jiě yī qǐ zài yóu yǒng chí lǐ yóu yǒng 。</p>
-                                <p onClick={handleSampleClick}>bǐ qǐ chá ， wǒ mén gēng xǐ huān kā fēi 。</p>
-                                <p onClick={handleSampleClick}>或許他會在英文課上閱讀。</p>
-                                <p onClick={handleSampleClick}>我們今天可以在我家見面，一起吃點心。</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>你好，你好嗎？</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我的姐姐很马马虎虎，经常丢三落四。</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我们更喜欢喝茶。</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>或許他會在英文課上閱讀。</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我們今天可以在我家見面，一起吃點心。</p>
 
                                 </div> 
                             )
