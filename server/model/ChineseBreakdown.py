@@ -6,8 +6,10 @@ from flask import request
 from spacy.util import filter_spans
 from spacy.tokens import Span
 
-from deep_translator import GoogleTranslator
 
+from deep_translator import GoogleTranslator
+# import language_tool_python
+# tool = language_tool_python.LanguageTool('zh')
 from pypinyin import slug, Style, pinyin
 
 ChineseBreakdown = Blueprint('ChineseBreakdown', __name__)
