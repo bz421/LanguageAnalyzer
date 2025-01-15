@@ -9,7 +9,7 @@ export default function App() {
     return (
         <div>
             <Router>
-                <Navbar />
+                {/*<Navbar />*/}
                 {/*<Sidebar />*/}
                 <Routes>
                     <Route path='/' exact element={<Home />} />

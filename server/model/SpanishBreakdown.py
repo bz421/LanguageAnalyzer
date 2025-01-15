@@ -112,7 +112,7 @@ def getVerbPhrases(d):
 
     for f in filtered:
         for token in f:
-            if token.pos_ == 'VERB' or token.lemma_.upper() == 'SER':
+            if token.pos_ == 'VERB' or token.lemma_.upper() == 'SER' or token.lemma_.upper() == 'ESTAR':
                 form = token.morph.get('VerbForm', ['Not applicable'])
                 mood = token.morph.get('Mood', ['Not applicable'])
                 tense = token.morph.get('Tense', ['Not applicable'])
