@@ -119,6 +119,7 @@ export default function Page() {
         setInput(null);
         setHasInput(false);
         setShowResult(false);
+        setWrongLang(false)
     };
 
     const handleSampleClick = (e) => {
@@ -232,7 +233,7 @@ export default function Page() {
                             ) : (
                                 <div className="sample">
                                 <h3>Or you can try one of these:</h3>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>你好，你好嗎？</p>
+                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>你好，你好吗？</p>
                                 <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我的姐姐很马马虎虎，经常丢三落四。</p>
                                 <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我们更喜欢喝茶。</p>
                                 <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>或許他會在英文課上閱讀。</p>
@@ -251,7 +252,10 @@ export default function Page() {
                 {/*<h4>Full data(check console)</h4>*/}
 
                 <div className="menu" style={{marginTop: '60px'}}>
-                    <button onClick={() => navigate('/')}>Home</button>
+                    <button onClick={() => {
+                        navigate('/')
+                        setWrongLang(false)
+                    }}>Home</button>
                 </div>
             </div>
         </div>
