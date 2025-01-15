@@ -25,7 +25,7 @@ export default function Home() {
     return (
         <div>
             {/*<Navbar/>*/}
-            <div class="menu">
+            <div className="menu">
                 <button onClick={() => navigate('/language/es/')}>Spanish</button>
                 <button onClick={() => navigate('/language/fr')}>French</button>
                 <button onClick={() => navigate('/language/zh')}>Mandarin</button>

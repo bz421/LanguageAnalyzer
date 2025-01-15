@@ -5,6 +5,8 @@ import './styles.css';
 import Sidebar from '../Components/Sidebar';
 import SentenceWrapper from '../Components/SentenceWrapper';
 import Alert from '@mui/material/Alert';
+import {IconButton} from '@mui/material'
+import ClearIcon from '@mui/icons-material/Clear';
 
 export default function Page() {
     const [msg, setMsg] = useState('');
@@ -13,6 +15,7 @@ export default function Page() {
     const [hasInput, setHasInput] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false); // Add loading state
     const [wrongLang, setWrongLang] = useState(false);
     const [actualLang, setActualLang] = useState('');
     const {lang} = useParams();
@@ -25,10 +28,13 @@ export default function Page() {
         const trimmedInput = input.trim();
         setInput(trimmedInput);
 
+        setLoading(true); // Set loading to true when data is being fetched
+
         await getTranslation(trimmedInput);
         await getData(trimmedInput);
 
         setShowResult(true);
+        setLoading(false); // Set loading to false once data is fetched
     };
 
     const getTranslation = async (trimmedInput) => {
@@ -84,25 +90,40 @@ export default function Page() {
         }
     };
 
+    const clearInput = (e) => {
+        setInput(null);
+        setHasInput(false);
+        setShowResult(false);
+    };
+
     useEffect(() => {
         getMessage();
     }, []);
 
-    const map = {es: 'Spanish', fr: 'French', zh: 'Chinese'};
+    const mapUpper = {es: 'Spanish', fr: 'French', zh: 'Chinese'};
+    const mapLower = {es: 'spanish', fr: 'french', zh: 'chinese'}
     return (
         <div>
             <Sidebar/>
             <div className="page">
                 {wrongLang && (['es', 'fr', 'zh'].includes(actualLang)
                     ? (<Alert severity="warning">Wrong language detected. Did you mean <a
-                        href={`/language/${actualLang}`}>{map[actualLang]}</a>?</Alert>)
+                        href={`/language/${actualLang}`}>{mapUpper[actualLang]}</a>?</Alert>)
                     : (<Alert severity="warning">Wrong language detected.</Alert>))
                 }
                 {hasInput && showResult ? (
                     <div className="centered-container">
-                        <div className="text-display">{input}</div>
+                        <div className="text-display">{input}
+                            {/*<button className="clear-button" onClick={clearInput}>*/}
+                            {/*    X*/}
+                            {/*</button>*/}
+                            <IconButton style={{marginLeft: 'auto'}} className="clear-button" onClick={clearInput}>
+                                <ClearIcon/>
+                            </IconButton>
+
+                        </div>
                         <div className="result centered-container">
-                            <p>English Translation: {translation}</p>
+                            <p><b>Translation: {translation}</b></p>
                             <SentenceWrapper data={data} lang={lang}/>
                             {/*<h4>Full data(check console)</h4>*/}
                         </div>
@@ -110,9 +131,9 @@ export default function Page() {
                 ) : (
                     <div className="centered-container">
                         <div className="instruction">
-                            {map[lang]} Sentence Analyzer
+                            {mapUpper[lang]} Sentence Analyzer
                             <p/>
-                            Enter a {lang} text to analyze!
+                            Enter a {mapLower[lang]} text to analyze!
                         </div>
 
                         <div className="text-box-container">
@@ -124,6 +145,8 @@ export default function Page() {
                                     value={input}
                                     onChange={handleInputChange}
                                     placeholder="Enter a message"
+                                    onFocus={(e) => e.target.placeholder = ''}
+                                    onBlur={(e) => e.target.placeholder = 'Enter a message'}
                                     onKeyUp={(e) => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault();
@@ -131,16 +154,21 @@ export default function Page() {
                                         }
                                     }}
                                 ></textarea>
-                                <button
-                                    type="submit"
-                                    style={{
-                                        backgroundColor: hasInput
-                                            ? 'rgb(239, 185, 79)'
-                                            : 'rgb(244, 215, 157)',
-                                    }}
-                                >
-                                    Analyze
-                                </button>
+                                {loading ? (
+                                    <div className="loader"></div>
+                                ) : (
+                                    <button
+                                        type="submit"
+                                        disabled={!hasInput}
+                                        style={{
+                                            backgroundColor: hasInput
+                                                ? 'rgb(239, 185, 79)'
+                                                : 'rgb(244, 215, 157)',
+                                        }}
+                                    >
+                                        Analyze
+                                    </button>
+                                )}
                             </form>
                         </div>
                     </div>
