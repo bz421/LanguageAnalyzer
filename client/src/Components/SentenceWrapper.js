@@ -404,7 +404,7 @@ export default function SentenceWrapper({data, lang}) {
 
     return (
         <>
-            <Grid2 container spacing={2} >
+            <Grid2 container spacing={2} justifyContent="space-evenly" flexWrap="wrap">
                 {data.tokens.map((token, index) => (
                     <Grid2 item key={index}>
                         {<Box
@@ -412,9 +412,10 @@ export default function SentenceWrapper({data, lang}) {
                                 textAlign: 'center',
                                 padding: '8px',
                                 borderRadius: '4px',
-                                backgroundColor: '#f0f0f0',
                                 margin: '8px',
                                 marginBottom: '4px',
+                                color: '#129799',
+                                fontWeight: '500',
                             }}
                         >
                             {token.tags.includes('particle') || token.tags.includes('baParticle') || token.tags.includes('beiParticle') ? (
@@ -429,6 +430,7 @@ export default function SentenceWrapper({data, lang}) {
                         <Box
                             ref={(el) => (tokenRefs.current[index] = el)}
                             sx={{
+                                fontWeight: '700',
                                 textAlign: 'center',
                                 padding: '8px',
                                 border:
@@ -512,6 +514,7 @@ export default function SentenceWrapper({data, lang}) {
                 <Box
                     sx={{
                         position: 'absolute',
+                        margin: 'auto',
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
