@@ -188,9 +188,22 @@ export default function Page() {
                         <div>
                             {syns && Object.keys(syns).length > 0 && (
                                 Object.keys(syns).map((adj) => (
-                                    syns[adj].slice(1).map((syn, i) => (
-                                        <p key={i}>{syn}</p>
+
+                                    // <span key={adj}>
+                                    //     {adj}: 
+                                    //     syns[adj].slice(1).map((syn, i) => (
+                                    //         {syn}, 
+                                    //     ))
+                                    // </span>
+                                    // {adj}:
+                                    syns[adj].map((item, index) => (
+                                        <p>{adj}: 
+                                            <span key={index}>
+                                            {item}{index < syns[adj].length - 1 ? ', ' : ''} 
+                                            </span>
+                                        </p>
                                     ))
+                                    
                                 ))
                             )}
                         </div>
