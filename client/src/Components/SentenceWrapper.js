@@ -225,7 +225,6 @@ export default function SentenceWrapper({data, lang}) {
                 end: lang === 'es' ? `See more on <a target="_blank" href="https://www.spanishdict.com/conjugate/${token.text}">SpanishDict</a>` : lang === 'fr' ? `See more on <a href="https://wordreference.com/conj/frverbs.aspx?v=${token.text}">WordReference</a>` : null
             });
         } else if (token.tags.includes('verb') && lang !== 'zh') {
-            console.log(token, token.info[0][0][0])
             const form = token.info[0][0][0] === "Fin" ? "finite" : "infinitive";
             const mood = token.info[0][1][0] === "Ind" ? 'indicative' : token.info[0][1][0] === 'Sub' ? 'subjunctive' : token.info[0][1][0] === 'Imp' ? 'imperative' : token.info[0][1][0] === 'Cnd' ? 'conditional' : 'N/A';
             const tense = token.info[0][2][0] === "Pres" ? 'present' : token.info[0][2][0] === 'Past' ? 'past' : token.info[0][2][0] === 'Imp' ? 'imperfect' : token.info[0][2][0] === 'Fut' ? 'future' : token.info[0][2][0] === 'Cnd' ? 'conditional' : 'N/A';
@@ -252,7 +251,6 @@ export default function SentenceWrapper({data, lang}) {
 
             token.details = `Form: ${form}, Mood: ${mood}, Tense: ${tense}, Person: ${person}, Number: ${number}`;
 
-            console.log(token.details)
             const objectDescriptions = objects.map(obj => `<b style="color: blue;">${obj}</b> is an object of <b style="color: red;">${token.text}</b> in this sentence`).join('<br/>');
             setPopupInfo({
                 title: token.text,
@@ -418,6 +416,8 @@ export default function SentenceWrapper({data, lang}) {
                                 backgroundColor: '#f0f0f0',
                                 margin: '8px',
                                 marginBottom: '4px',
+                                color: '#129799',
+                                fontWeight: '500',
                             }}
                         >
                             {token.tags.includes('particle') || token.tags.includes('baParticle') || token.tags.includes('beiParticle') ? (
@@ -432,6 +432,7 @@ export default function SentenceWrapper({data, lang}) {
                         <Box
                             ref={(el) => (tokenRefs.current[index] = el)}
                             sx={{
+                                fontWeight: '700',
                                 textAlign: 'center',
                                 padding: '8px',
                                 border:
@@ -515,6 +516,7 @@ export default function SentenceWrapper({data, lang}) {
                 <Box
                     sx={{
                         position: 'absolute',
+                        margin: 'auto',
                         top: '50%',
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
