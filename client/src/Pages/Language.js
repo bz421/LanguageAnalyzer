@@ -164,6 +164,7 @@ export default function Page() {
                                             backgroundColor: hasInput
                                                 ? 'rgb(239, 185, 79)'
                                                 : 'rgb(244, 215, 157)',
+                                            cursor: 'pointer',
                                         }}
                                     >
                                         Analyze
