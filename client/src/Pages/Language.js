@@ -94,7 +94,7 @@ export default function Page() {
         console.log(correction)
     };
 
-    const getSyn = async(trimmedInput) => {
+    const getSyn = async (trimmedInput) => {
         const response = await fetch(`/api/${lang}/getSyn`, {
             method: 'POST',
             headers: {
@@ -106,11 +106,15 @@ export default function Page() {
         });
         const syns = await response.json();
         console.log('Synonyms: ' + JSON.stringify(syns, null, 2));
+
+        // for (const element of syns) {
+        //     for (const key in element) {
+        //         console.log(key, element[key]);
+        //     }
+        // }
         setSyns(syns);
     };
 
-
-    
 
     const getMessage = async () => {
         await fetch(`/api/hello`)
@@ -176,16 +180,20 @@ export default function Page() {
                             </div>
                         )}
                         <div className="result centered-container">
-                            <p style={{color : '#ab5620', fontWeight : '500', fontSize : '1.1rem'}}>{translation}</p>
+                            <p style={{color: '#ab5620', fontWeight: '500', fontSize: '1.1rem'}}>{translation}</p>
                             <SentenceWrapper data={data} lang={lang}/>
                             {/*<h4>Full data(check console)</h4>*/}
                         </div>
 
-                        {/* {syns && Object.keys(syns).length > 0 && (
-                            Object.keys(syns).map(adj => 
-                                <p>{adj}: {syns[adj][0]}</p>
-                            )
-                        )} */}
+                        <div>
+                            {syns && Object.keys(syns).length > 0 && (
+                                Object.keys(syns).map((adj) => (
+                                    syns[adj].slice(1).map((syn, i) => (
+                                        <p key={i}>{syn}</p>
+                                    ))
+                                ))
+                            )}
+                        </div>
                     </div>
                 ) : (
                     <div className="centered-container">
@@ -231,39 +239,59 @@ export default function Page() {
                             </form>
                         </div>
 
-                        
-                        {(lang === 'es') ? 
-                        (
-                            <div className="sample">
-                                <h3>Or you can try one of these:</h3>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Hola, ¿cómo estás?</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>A mí me gusta nadar en la piscina con mi hermana</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nosotros preferimos el café al té.</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>A lo mejor, leerá en su clase de inglés.</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Podemos quedar en mi casa para tomar una merienda hoy.</p>
-                            </div>
-                        ) : (
-                            (lang === 'fr') ?
-                            (<div className="sample">
-                                <h3>Or you can try one of these:</h3>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Bonjour, comment ça va?</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>J'aime nager dans la piscine avec ma sœur.</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nous préférons le café au thé.</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Peut-être qu'il lira dans son cours d'anglais.</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nous pouvons nous retrouver chez moi pour un goûter aujourd'hui.</p>
-                            </div>
-                            ) : (
-                                <div className="sample">
-                                <h3>Or you can try one of these:</h3>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>你好，你好嗎？</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我的姐姐很马马虎虎，经常丢三落四。</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我们更喜欢喝茶。</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>或許他會在英文課上閱讀。</p>
-                                <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我們今天可以在我家見面，一起吃點心。</p>
 
-                                </div> 
+                        {(lang === 'es') ?
+                            (
+                                <div className="sample">
+                                    <h3>Or you can try one of these:</h3>
+                                    <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Hola, ¿cómo estás?</p>
+                                    <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>A mí me gusta nadar en la
+                                        piscina
+                                        con mi hermana</p>
+                                    <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nosotros preferimos el
+                                        café al
+                                        té.</p>
+                                    <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>A lo mejor, leerá en su
+                                        clase de
+                                        inglés.</p>
+                                    <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Podemos quedar en mi casa
+                                        para
+                                        tomar una merienda hoy.</p>
+                                </div>
+                            ) : (
+                                (lang === 'fr') ?
+                                    (<div className="sample">
+                                            <h3>Or you can try one of these:</h3>
+                                            <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Bonjour, comment
+                                                ça
+                                                va?</p>
+                                            <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>J'aime nager dans
+                                                la
+                                                piscine avec ma sœur.</p>
+                                            <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nous préférons le
+                                                café au
+                                                thé.</p>
+                                            <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Peut-être qu'il
+                                                lira dans
+                                                son cours d'anglais.</p>
+                                            <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>Nous pouvons nous
+                                                retrouver chez moi pour un goûter aujourd'hui.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="sample">
+                                            <h3>Or you can try one of these:</h3>
+                                            <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>你好，你好嗎？</p>
+                                            <p onClick={handleSampleClick}
+                                               style={{cursor: 'pointer'}}>我的姐姐很马马虎虎，经常丢三落四。</p>
+                                            <p onClick={handleSampleClick} style={{cursor: 'pointer'}}>我们更喜欢喝茶。</p>
+                                            <p onClick={handleSampleClick}
+                                               style={{cursor: 'pointer'}}>或許他會在英文課上閱讀。</p>
+                                            <p onClick={handleSampleClick}
+                                               style={{cursor: 'pointer'}}>我們今天可以在我家見面，一起吃點心。</p>
+
+                                        </div>
+                                    )
                             )
-                        )
 
 
                         }
@@ -278,5 +306,6 @@ export default function Page() {
                 </div>
             </div>
         </div>
-    );
+    )
+        ;
 }
