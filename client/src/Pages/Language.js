@@ -15,6 +15,8 @@ export default function Page() {
     // const [objs, setObjs] = useState('')
 
     const [data, setData] = useState([])
+    const [correction, setCorrection] = useState('')
+
 
     // const [pinyin, setPinyin] = useState([])
     // const [chengyu, setChengyu] = useState([])
@@ -34,6 +36,7 @@ export default function Page() {
 
         getTranslation(trimmedInput)
         getData(trimmedInput)
+        checkGrammar(trimmedInput)
     }
 
     const getTranslation = async (trimmedInput) => {
@@ -64,6 +67,21 @@ export default function Page() {
         const data = await response.json()
         console.log('Final data: ' + JSON.stringify(data, null, 2))
         setData(data)
+    }
+
+    const checkGrammar = async (trimmedInput) => {
+        const response = await fetch(`/api/${lang}/checkGrammar`, {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                'q': trimmedInput
+            })
+        })
+        const data = await response.json();
+        console.log('Fixed sentence: ' + JSON.stringify(data.corrected, null, 2))
+        setCorrection(data.corrected)
     }
 
     const getMessage = async () => {
@@ -100,6 +118,14 @@ export default function Page() {
                 </form>
                 <p>English Translation: {translation}</p>
                 <p>Detected Language: {lang}</p>
+
+
+                {correction && correction.length > 0 && (
+                    <div style={{textAlign: 'center'}}>
+                        <h1>Perhaps you meant this?</h1>
+                        <p>{correction}</p>
+                    </div>
+                )}
 
                 {data && Object.keys(data).length > 0 && (
                     <div style={{textAlign: 'center'}}>

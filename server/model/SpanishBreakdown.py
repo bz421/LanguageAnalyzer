@@ -8,7 +8,8 @@ translator = GoogleTranslator(source='es', target='en')
 SpanishBreakdown = Blueprint('SpanishBreakdown', __name__)
 
 from spacy.matcher import Matcher
-
+import language_tool_python
+tool = language_tool_python.LanguageTool('es')
 nlpES = spacy.load('es_dep_news_trf')
 
 """
@@ -292,6 +293,20 @@ def spanishData():
 
     # print('out', json.dumps(out, indent=4))
     return out, 200
+
+
+@SpanishBreakdown.route('/api/es/checkGrammar', methods=['POST'])
+def checkESGrammar():
+    data = request.get_json()
+    if not data or 'q' not in data:
+        return {'error': 'No query provided'}, 400
+    
+    correctText = tool.correct(data['q'])
+
+    if(correctText == data['q']):
+        return {'corrected': None}, 200
+    else:
+        return {'corrected': correctText}, 200
 
 print('Ready Spanish')
 # Mi mamá alta quiere bailar con sus mejores amigas.
